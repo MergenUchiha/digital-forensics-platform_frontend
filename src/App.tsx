@@ -1,5 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Layout } from '@/components/layout/Layout';
+import { Login } from '@/pages/Login';
+import { Register } from '@/pages/Register';
 import { Dashboard } from '@/pages/Dashboard';
 import { Cases } from '@/pages/Cases';
 import { CaseDetails } from '@/pages/CaseDetails';
@@ -8,29 +12,41 @@ import { TimelinePage } from '@/pages/TimelinePage';
 import { NetworkAnalysis } from '@/pages/NetworkAnalysis';
 import { Reports } from '@/pages/Reports';
 import { NotificationContainer } from '@/components/ui/Notification';
+import { Settings } from './pages/Settings';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Layout>
+    <AuthProvider>
+      <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/cases" element={<Cases />} />
-          <Route path="/cases/:id" element={<CaseDetails />} />
-          <Route path="/evidence" element={<Evidence />} />
-          <Route path="/timeline" element={<TimelinePage />} />
-          <Route path="/network" element={<NetworkAnalysis />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/settings" element={
-            <div className="text-center py-12">
-              <h2 className="text-2xl font-bold text-gray-100">Settings</h2>
-              <p className="text-gray-400 mt-2">Coming soon...</p>
-            </div>
-          } />
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Protected Routes */}
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/cases" element={<Cases />} />
+                    <Route path="/cases/:id" element={<CaseDetails />} />
+                    <Route path="/evidence" element={<Evidence />} />
+                    <Route path="/timeline" element={<TimelinePage />} />
+                    <Route path="/network" element={<NetworkAnalysis />} />
+                    <Route path="/reports" element={<Reports />} />
+                    <Route path="/settings" element={<Settings />} />
+                  </Routes>
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
         </Routes>
-      </Layout>
-      <NotificationContainer />
-    </BrowserRouter>
+        <NotificationContainer />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

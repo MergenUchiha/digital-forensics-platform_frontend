@@ -1,4 +1,4 @@
-import { Case, Evidence, TimelineEvent, DashboardStats, User, NetworkNode, NetworkConnection } from '@/types';
+import { Case, EvidenceItem, TimelineEvent, DashboardStats, User, NetworkNode, NetworkConnection } from '@/types';
 
 export const mockUser: User = {
   id: '1',
@@ -102,7 +102,7 @@ export const mockCases: Case[] = [
   },
 ];
 
-export const mockEvidence: Evidence[] = [
+export const mockEvidence: EvidenceItem[] = [
   {
     id: '1',
     caseId: '1',

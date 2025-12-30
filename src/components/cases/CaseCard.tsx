@@ -1,8 +1,7 @@
 import { Case } from '@/types';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { formatRelativeTime } from '@/utils/format';
-import { getStatusColor } from '@/utils/format';
+import { formatRelativeTime, getStatusColor } from '@/utils/format';
 import { MapPin, Database, Activity } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +19,10 @@ const severityColors = {
 
 export const CaseCard = ({ case: c }: CaseCardProps) => {
   const navigate = useNavigate();
+
+  // Безопасное получение статистики
+  const evidenceCount = c.evidenceCount || 0;
+  const suspiciousActivities = c.suspiciousActivities || 0;
 
   return (
     <motion.div
@@ -47,36 +50,38 @@ export const CaseCard = ({ case: c }: CaseCardProps) => {
           </div>
 
           {/* Tags */}
-          <div className="flex flex-wrap gap-2">
-            {c.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded"
-              >
-                #{tag}
-              </span>
-            ))}
-            {c.tags.length > 3 && (
-              <span className="px-2 py-1 bg-gray-800 text-gray-400 text-xs rounded">
-                +{c.tags.length - 3}
-              </span>
-            )}
-          </div>
+          {c.tags && c.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {c.tags.slice(0, 3).map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded"
+                >
+                  #{tag}
+                </span>
+              ))}
+              {c.tags.length > 3 && (
+                <span className="px-2 py-1 bg-gray-800 text-gray-400 text-xs rounded">
+                  +{c.tags.length - 3}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Stats */}
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1 text-gray-400">
               <Database className="w-4 h-4" />
-              <span>{c.stats.evidenceCount} evidence</span>
+              <span>{evidenceCount} evidence</span>
             </div>
             <div className="flex items-center gap-1 text-gray-400">
               <Activity className="w-4 h-4" />
-              <span>{c.stats.suspiciousActivities} alerts</span>
+              <span>{suspiciousActivities} alerts</span>
             </div>
-            {c.location && (
+            {c.locationCity && c.locationCountry && (
               <div className="flex items-center gap-1 text-gray-400">
                 <MapPin className="w-4 h-4" />
-                <span>{c.location.city}</span>
+                <span>{c.locationCity}</span>
               </div>
             )}
           </div>
@@ -85,10 +90,12 @@ export const CaseCard = ({ case: c }: CaseCardProps) => {
           <div className="flex items-center justify-between pt-4 border-t border-gray-800">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                {c.createdBy.name.split(' ').map(n => n[0]).join('')}
+                {c.createdBy?.name ? c.createdBy.name.split(' ').map(n => n[0]).join('') : 'U'}
               </div>
               <div>
-                <p className="text-sm text-gray-300">{c.assignedTo?.name || 'Unassigned'}</p>
+                <p className="text-sm text-gray-300">
+                  {c.assignedTo?.name || 'Unassigned'}
+                </p>
                 <p className="text-xs text-gray-500">{formatRelativeTime(c.updatedAt)}</p>
               </div>
             </div>

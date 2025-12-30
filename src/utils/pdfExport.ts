@@ -1,11 +1,11 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Case, Evidence, TimelineEvent } from '@/types';
+import { Case, EvidenceItem, TimelineEvent } from '@/types';
 import { formatDate } from './format';
 
 export const exportCaseToPDF = (
   caseData: Case,
-  evidence: Evidence[],
+  evidence: EvidenceItem[],
   events: TimelineEvent[]
 ) => {
   const doc = new jsPDF();

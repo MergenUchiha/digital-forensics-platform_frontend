@@ -7,19 +7,22 @@ import { CaseStatus, CaseSeverity } from '@/types';
 interface CreateCaseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CaseFormData) => void;
+  onSubmit: (data: CaseFormData) => Promise<void>;
 }
 
 export interface CaseFormData {
   title: string;
   description: string;
   severity: CaseSeverity;
-  status: CaseStatus;
-  tags: string[];
+  status?: CaseStatus;
+  tags?: string[];
   location?: {
     city: string;
     country: string;
+    lat?: number;
+    lng?: number;
   };
+  assignedToId?: string;
 }
 
 export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalProps) => {
@@ -30,35 +33,38 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
     status: 'open',
     tags: [],
   });
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [tagInput, setTagInput] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    setFormData({
-      title: '',
-      description: '',
-      severity: 'medium',
-      status: 'open',
-      tags: [],
-    });
-    setTagInput('');
-    onClose();
-
-    // Показываем уведомление
-    (window as any).showNotification?.({
-      type: 'success',
-      title: 'Case Created',
-      message: `Case "${formData.title}" has been successfully created`,
-    });
+    setIsSubmitting(true);
+    
+    try {
+      await onSubmit(formData);
+      
+      // Reset form
+      setFormData({
+        title: '',
+        description: '',
+        severity: 'medium',
+        status: 'open',
+        tags: [],
+      });
+      setTagInput('');
+      onClose();
+    } catch (error) {
+      console.error('Failed to create case:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
+    if (tagInput.trim() && !formData.tags?.includes(tagInput.trim())) {
       setFormData({
         ...formData,
-        tags: [...formData.tags, tagInput.trim()],
+        tags: [...(formData.tags || []), tagInput.trim()],
       });
       setTagInput('');
     }
@@ -67,7 +73,7 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
   const removeTag = (tag: string) => {
     setFormData({
       ...formData,
-      tags: formData.tags.filter(t => t !== tag),
+      tags: formData.tags?.filter(t => t !== tag),
     });
   };
 
@@ -149,7 +155,11 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
               value={formData.location?.city || ''}
               onChange={(e) => setFormData({
                 ...formData,
-                location: { ...formData.location, city: e.target.value, country: formData.location?.country || '' }
+                location: { 
+                  ...formData.location, 
+                  city: e.target.value, 
+                  country: formData.location?.country || '' 
+                }
               })}
               placeholder="e.g., San Francisco"
             />
@@ -164,7 +174,10 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
               value={formData.location?.country || ''}
               onChange={(e) => setFormData({
                 ...formData,
-                location: { city: formData.location?.city || '', country: e.target.value }
+                location: { 
+                  city: formData.location?.city || '', 
+                  country: e.target.value 
+                }
               })}
               placeholder="e.g., USA"
             />
@@ -195,7 +208,7 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {formData.tags.map(tag => (
+            {formData.tags?.map(tag => (
               <span
                 key={tag}
                 className="px-3 py-1 bg-gray-800 text-gray-300 text-sm rounded-full flex items-center gap-2"
@@ -215,10 +228,21 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
 
         {/* Actions */}
         <div className="flex gap-3 pt-4 border-t border-gray-800">
-          <Button type="submit" variant="primary" className="flex-1">
-            Create Case
+          <Button 
+            type="submit" 
+            variant="primary" 
+            className="flex-1"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Creating...' : 'Create Case'}
           </Button>
-          <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
+          <Button 
+            type="button" 
+            variant="secondary" 
+            onClick={onClose} 
+            className="flex-1"
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
         </div>

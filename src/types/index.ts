@@ -31,14 +31,21 @@ export interface Case {
     country: string;
     city: string;
   };
-  stats: {
+  locationCity?: string;
+  locationCountry?: string;
+  locationLat?: number;
+  locationLng?: number;
+  evidenceCount?: number;
+  eventsCount?: number;
+  suspiciousActivities?: number;
+  stats?: {
     evidenceCount: number;
     eventsCount: number;
     suspiciousActivities: number;
   };
 }
 
-export interface Evidence {
+export interface EvidenceItem  {
   id: string;
   caseId: string;
   name: string;
@@ -48,7 +55,10 @@ export interface Evidence {
     md5: string;
     sha256: string;
   };
+  md5Hash?: string;
+  sha256Hash?: string;
   size: number;
+  fileSize?: number;
   uploadedBy: User;
   uploadedAt: string;
   metadata: Record<string, any>;
@@ -80,6 +90,10 @@ export interface TimelineEvent {
     files?: string[];
     devices?: string[];
   };
+  ipAddresses?: string[];
+  usernames?: string[];
+  files?: string[];
+  devices?: string[];
 }
 
 export interface NetworkNode {
@@ -135,19 +149,25 @@ export interface Finding {
 }
 
 export interface DashboardStats {
-  totalCases: number;
-  activeCases: number;
-  criticalCases: number;
-  evidenceCollected: number;
-  eventsAnalyzed: number;
-  casesThisMonth: number;
-  avgResolutionTime: number;
-  topThreats: Array<{
+  totalCases?: number;
+  activeCases?: number;
+  criticalCases?: number;
+  evidenceCollected?: number;
+  eventsAnalyzed?: number;
+  totalEvents?: number;
+  criticalAlerts?: number;
+  activeIncidents?: number;
+  threatsBlocked?: number;
+  securityScore?: number;
+  lastUpdate?: string;
+  casesThisMonth?: number;
+  avgResolutionTime?: number;
+  topThreats?: Array<{
     name: string;
     count: number;
     trend: 'up' | 'down' | 'stable';
   }>;
-  recentActivity: Array<{
+  recentActivity?: Array<{
     id: string;
     type: 'case_created' | 'evidence_uploaded' | 'analysis_completed';
     title: string;
@@ -172,5 +192,5 @@ export interface ReportSection {
   title: string;
   content: string;
   charts?: any[];
-  evidence?: Evidence[];
+  evidence?: EvidenceItem[];
 }

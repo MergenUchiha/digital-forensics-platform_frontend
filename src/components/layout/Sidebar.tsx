@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   LayoutDashboard, 
   FolderOpen, 
@@ -7,7 +8,8 @@ import {
   Network, 
   FileText,
   Settings,
-  Shield
+  Shield,
+  LogOut
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
@@ -23,6 +25,7 @@ const menuItems = [
 
 export const Sidebar = () => {
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   return (
     <aside className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col">
@@ -65,15 +68,26 @@ export const Sidebar = () => {
 
       {/* Footer */}
       <div className="p-4 border-t border-gray-800">
-        <div className="flex items-center gap-3 px-4 py-2">
+        <div className="flex items-center gap-3 px-4 py-2 mb-2">
           <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-            AJ
+            {user?.name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-200 truncate">Alex Johnson</p>
-            <p className="text-xs text-gray-500">Senior Analyst</p>
+            <p className="text-sm font-medium text-gray-200 truncate">
+              {user?.name || 'User'}
+            </p>
+            <p className="text-xs text-gray-500 capitalize">
+              {user?.role || 'Analyst'}
+            </p>
           </div>
         </div>
+        <button
+          onClick={logout}
+          className="w-full flex items-center gap-3 px-4 py-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="text-sm font-medium">Logout</span>
+        </button>
       </div>
     </aside>
   );
