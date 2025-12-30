@@ -9,26 +9,32 @@ interface TimelineProps {
   events: TimelineEvent[];
 }
 
-const eventIcons = {
-  authentication: Lock,
-  network: Network,
-  file_access: FileText,
-  system: Activity,
-  api_call: Shield,
-  alert: Bell,
+const eventIcons: Record<string, any> = {
+  AUTHENTICATION: Lock,
+  NETWORK: Network,
+  FILE_ACCESS: FileText,
+  SYSTEM: Activity,
+  API_CALL: Shield,
+  ALERT: Bell,
 };
 
-const severityVariants = {
-  info: 'info' as const,
-  warning: 'warning' as const,
-  critical: 'danger' as const,
+const severityVariants: Record<string, 'info' | 'warning' | 'danger'> = {
+  LOW: 'info',
+  MEDIUM: 'info',
+  HIGH: 'warning',
+  CRITICAL: 'danger',
+  INFO: 'info',
+  WARNING: 'warning',
 };
 
 export const Timeline = ({ events }: TimelineProps) => {
   return (
     <div className="space-y-4">
       {events.map((event, index) => {
-        const Icon = eventIcons[event.type];
+        const eventType = event.type?.toUpperCase() || 'SYSTEM';
+        const Icon = eventIcons[eventType] || Activity;
+        const severity = event.severity?.toUpperCase() || 'INFO';
+        const variant = severityVariants[severity] || 'info';
         
         return (
           <motion.div
@@ -47,9 +53,9 @@ export const Timeline = ({ events }: TimelineProps) => {
               {/* Icon */}
               <div className="relative z-10">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  event.severity === 'critical' 
+                  severity === 'CRITICAL' 
                     ? 'bg-red-500/10 text-red-400' 
-                    : event.severity === 'warning'
+                    : severity === 'HIGH' || severity === 'WARNING'
                     ? 'bg-yellow-500/10 text-yellow-400'
                     : 'bg-blue-500/10 text-blue-400'
                 }`}>
@@ -66,8 +72,8 @@ export const Timeline = ({ events }: TimelineProps) => {
                         <h4 className="text-base font-semibold text-gray-100">
                           {event.title}
                         </h4>
-                        <Badge variant={severityVariants[event.severity]}>
-                          {event.severity.toUpperCase()}
+                        <Badge variant={variant}>
+                          {severity}
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-400">{event.description}</p>
@@ -78,13 +84,13 @@ export const Timeline = ({ events }: TimelineProps) => {
                   <div className="flex flex-wrap gap-4 mt-3 text-xs text-gray-500">
                     <span>⏰ {formatDate(event.timestamp)}</span>
                     <span>📍 {event.source}</span>
-                    {event.relatedEntities?.ipAddresses && (
-                      <span>🌐 {event.relatedEntities.ipAddresses[0]}</span>
+                    {event.ipAddresses && event.ipAddresses.length > 0 && (
+                      <span>🌐 {event.ipAddresses[0]}</span>
                     )}
                   </div>
 
                   {/* Additional metadata if available */}
-                  {Object.keys(event.metadata).length > 0 && (
+                  {event.metadata && Object.keys(event.metadata).length > 0 && (
                     <div className="mt-3 pt-3 border-t border-gray-800">
                       <details className="text-xs">
                         <summary className="text-gray-400 cursor-pointer hover:text-gray-300">

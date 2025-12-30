@@ -7,12 +7,40 @@ interface WorldMapProps {
 }
 
 export const WorldMap = ({ cases }: WorldMapProps) => {
-  // Simple representation of world map with dots
-  const getPosition = (lat: number, lng: number) => {
+  // Фильтруем только дела с локацией
+  const casesWithLocation = cases.filter(c => {
+    // Проверяем оба варианта структуры данных
+    const hasLocation = c.location?.lat && c.location?.lng;
+    const hasDirectLocation = c.locationLat && c.locationLng;
+    return hasLocation || hasDirectLocation;
+  });
+
+  const getPosition = (c: Case) => {
+    // Получаем координаты из любого доступного источника
+    const lat = c.location?.lat || c.locationLat || 0;
+    const lng = c.location?.lng || c.locationLng || 0;
+    
     // Convert lat/lng to x/y coordinates (simplified projection)
     const x = ((lng + 180) / 360) * 100;
     const y = ((90 - lat) / 180) * 100;
     return { x, y };
+  };
+
+  const getLocationName = (c: Case) => {
+    if (c.location) {
+      return `${c.location.city}, ${c.location.country}`;
+    }
+    if (c.locationCity && c.locationCountry) {
+      return `${c.locationCity}, ${c.locationCountry}`;
+    }
+    return 'Unknown location';
+  };
+
+  const severityColors: Record<string, string> = {
+    critical: '#ef4444',
+    high: '#f97316',
+    medium: '#eab308',
+    low: '#3b82f6',
   };
 
   return (
@@ -48,64 +76,65 @@ export const WorldMap = ({ cases }: WorldMapProps) => {
           </div>
 
           {/* Incident markers */}
-          {cases.map((c) => {
-            if (!c.location) return null;
-            const pos = getPosition(c.location.lat, c.location.lng);
-            
-            const severityColors = {
-              critical: '#ef4444',
-              high: '#f97316',
-              medium: '#eab308',
-              low: '#3b82f6',
-            };
+          {casesWithLocation.length > 0 ? (
+            casesWithLocation.map((c) => {
+              const pos = getPosition(c);
+              const locationName = getLocationName(c);
+              const evidenceCount = c.evidenceCount || c.stats?.evidenceCount || 0;
+              const suspiciousActivities = c.suspiciousActivities || c.stats?.suspiciousActivities || 0;
 
-            return (
-              <motion.div
-                key={c.id}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: Math.random() * 0.3 }}
-                className="absolute group cursor-pointer"
-                style={{
-                  left: `${pos.x}%`,
-                  top: `${pos.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                {/* Pulse ring */}
+              return (
                 <motion.div
-                  className="absolute inset-0 rounded-full"
-                  style={{ backgroundColor: severityColors[c.severity] }}
-                  animate={{
-                    scale: [1, 2, 1],
-                    opacity: [0.6, 0, 0.6],
+                  key={c.id}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: Math.random() * 0.3 }}
+                  className="absolute group cursor-pointer"
+                  style={{
+                    left: `${pos.x}%`,
+                    top: `${pos.y}%`,
+                    transform: 'translate(-50%, -50%)',
                   }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                />
-                
-                {/* Main dot */}
-                <div
-                  className="w-3 h-3 rounded-full relative z-10"
-                  style={{ backgroundColor: severityColors[c.severity] }}
-                />
+                >
+                  {/* Pulse ring */}
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    style={{ backgroundColor: severityColors[c.severity] }}
+                    animate={{
+                      scale: [1, 2, 1],
+                      opacity: [0.6, 0, 0.6],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                  
+                  {/* Main dot */}
+                  <div
+                    className="w-3 h-3 rounded-full relative z-10"
+                    style={{ backgroundColor: severityColors[c.severity] }}
+                  />
 
-                {/* Tooltip */}
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 whitespace-nowrap shadow-xl">
-                    <p className="text-sm font-semibold text-gray-100">{c.title}</p>
-                    <p className="text-xs text-gray-400 mt-1">{c.location.city}, {c.location.country}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {c.stats.evidenceCount} evidence · {c.stats.suspiciousActivities} alerts
-                    </p>
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                    <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 whitespace-nowrap shadow-xl">
+                      <p className="text-sm font-semibold text-gray-100">{c.title}</p>
+                      <p className="text-xs text-gray-400 mt-1">{locationName}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {evidenceCount} evidence · {suspiciousActivities} alerts
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            );
-          })}
+                </motion.div>
+              );
+            })
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-gray-500 text-sm">No cases with location data</p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

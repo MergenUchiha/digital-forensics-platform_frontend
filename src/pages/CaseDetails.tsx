@@ -1,20 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Timeline } from '@/components/timeline/Timeline';
 import { EvidenceCard } from '@/components/evidence/EvidenceCard';
-import { mockCases, mockEvidence, mockTimelineEvents } from '@/data/mockData';
-import { formatDate, formatRelativeTime, getStatusColor, getSeverityColor } from '@/utils/format';
+import { Case, EvidenceItem, TimelineEvent } from '@/types';
+import { formatDate, formatRelativeTime, getStatusColor } from '@/utils/format';
 import { exportCaseToPDF } from '@/utils/pdfExport';
 import { 
   ArrowLeft, 
   MapPin, 
-  Calendar, 
-  User, 
   Activity, 
-  FileText,
   Shield,
   AlertTriangle,
   Clock,
@@ -22,18 +19,69 @@ import {
   Download,
   Share2,
   CheckCircle,
-  XCircle
+  Database
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { casesService } from '@/services/cases.service';
+import { evidenceService } from '@/services/evidence.service';
+import { timelineService } from '@/services/timeline.service';
 
 export const CaseDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'evidence' | 'timeline' | 'analysis'>('overview');
+  const [caseData, setCaseData] = useState<Case | null>(null);
+  const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
+  const [events, setEvents] = useState<TimelineEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Найти дело по ID
-  const caseData = mockCases.find(c => c.id === id);
-  
+  useEffect(() => {
+    if (id) {
+      fetchCaseData(id);
+    }
+  }, [id]);
+
+  const fetchCaseData = async (caseId: string) => {
+    try {
+      setIsLoading(true);
+      const [caseResponse, evidenceResponse, eventsResponse] = await Promise.all([
+        casesService.getById(caseId),
+        evidenceService.getAll(caseId),
+        timelineService.getAll(caseId),
+      ]);
+
+      setCaseData(caseResponse);
+      setEvidence(evidenceResponse);
+      setEvents(eventsResponse);
+    } catch (error) {
+      console.error('Failed to fetch case data:', error);
+      (window as any).showNotification?.({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to load case details',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleExportPDF = () => {
+    if (caseData) {
+      exportCaseToPDF(caseData, evidence, events);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-cyber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading case details...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!caseData) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -50,15 +98,19 @@ export const CaseDetails = () => {
     );
   }
 
-  const caseEvidence = mockEvidence.filter(e => e.caseId === caseData.id);
-  const caseEvents = mockTimelineEvents.filter(e => e.caseId === caseData.id);
-
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: FileText },
-    { id: 'evidence', label: 'Evidence', icon: Shield, badge: caseEvidence.length },
-    { id: 'timeline', label: 'Timeline', icon: Clock, badge: caseEvents.length },
+    { id: 'overview', label: 'Overview', icon: Shield },
+    { id: 'evidence', label: 'Evidence', icon: Database, badge: evidence.length },
+    { id: 'timeline', label: 'Timeline', icon: Clock, badge: events.length },
     { id: 'analysis', label: 'Analysis', icon: Activity },
   ] as const;
+
+  const severityColors: any = {
+    critical: 'danger',
+    high: 'warning',
+    medium: 'info',
+    low: 'success',
+  };
 
   return (
     <div className="space-y-6">
@@ -84,7 +136,7 @@ export const CaseDetails = () => {
             </div>
             
             <div className="flex gap-2">
-              <Badge variant={caseData.severity === 'critical' ? 'danger' : caseData.severity === 'high' ? 'warning' : 'info'}>
+              <Badge variant={severityColors[caseData.severity]}>
                 {caseData.severity.toUpperCase()}
               </Badge>
               <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(caseData.status)}`}>
@@ -104,7 +156,7 @@ export const CaseDetails = () => {
         <Button 
           variant="secondary" 
           className="gap-2"
-          onClick={() => exportCaseToPDF(caseData, caseEvidence, caseEvents)}
+          onClick={handleExportPDF}
         >
           <Download className="w-4 h-4" />
           Export Report
@@ -113,12 +165,6 @@ export const CaseDetails = () => {
           <Share2 className="w-4 h-4" />
           Share
         </Button>
-        {caseData.status === 'open' && (
-          <Button variant="secondary" className="gap-2 ml-auto">
-            <CheckCircle className="w-4 h-4" />
-            Mark as Resolved
-          </Button>
-        )}
       </div>
 
       {/* Stats Cards */}
@@ -130,7 +176,7 @@ export const CaseDetails = () => {
             </div>
             <div>
               <p className="text-sm text-gray-400">Evidence Collected</p>
-              <p className="text-2xl font-bold text-gray-100">{caseData.stats.evidenceCount}</p>
+              <p className="text-2xl font-bold text-gray-100">{evidence.length}</p>
             </div>
           </CardContent>
         </Card>
@@ -142,7 +188,7 @@ export const CaseDetails = () => {
             </div>
             <div>
               <p className="text-sm text-gray-400">Events Logged</p>
-              <p className="text-2xl font-bold text-gray-100">{caseData.stats.eventsCount}</p>
+              <p className="text-2xl font-bold text-gray-100">{events.length}</p>
             </div>
           </CardContent>
         </Card>
@@ -154,7 +200,9 @@ export const CaseDetails = () => {
             </div>
             <div>
               <p className="text-sm text-gray-400">Suspicious Activities</p>
-              <p className="text-2xl font-bold text-gray-100">{caseData.stats.suspiciousActivities}</p>
+              <p className="text-2xl font-bold text-gray-100">
+                {events.filter(e => e.severity === 'critical').length}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -195,7 +243,7 @@ export const CaseDetails = () => {
               >
                 <Icon className="w-4 h-4" />
                 <span>{tab.label}</span>
-                {tab.badge && (
+                {tab.badge !== undefined && (
                   <span className="px-2 py-0.5 bg-cyan-500/20 text-cyan-400 text-xs rounded-full">
                     {tab.badge}
                   </span>
@@ -215,7 +263,6 @@ export const CaseDetails = () => {
       >
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Info */}
             <div className="lg:col-span-2 space-y-6">
               <Card>
                 <CardHeader>
@@ -250,9 +297,6 @@ export const CaseDetails = () => {
                       <p className="text-gray-100">
                         {caseData.location.city}, {caseData.location.country}
                       </p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Coordinates: {caseData.location.lat.toFixed(4)}, {caseData.location.lng.toFixed(4)}
-                      </p>
                     </div>
                   )}
 
@@ -271,18 +315,8 @@ export const CaseDetails = () => {
                   </div>
                 </CardContent>
               </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Description</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-300 leading-relaxed">{caseData.description}</p>
-                </CardContent>
-              </Card>
             </div>
 
-            {/* Sidebar */}
             <div className="space-y-6">
               <Card>
                 <CardHeader>
@@ -312,30 +346,6 @@ export const CaseDetails = () => {
                   )}
                 </CardContent>
               </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2" />
-                      <div>
-                        <p className="text-sm text-gray-300">Case created</p>
-                        <p className="text-xs text-gray-500">{formatRelativeTime(caseData.createdAt)}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
-                      <div>
-                        <p className="text-sm text-gray-300">Last updated</p>
-                        <p className="text-xs text-gray-500">{formatRelativeTime(caseData.updatedAt)}</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
         )}
@@ -344,21 +354,17 @@ export const CaseDetails = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-100">
-                Evidence Collection ({caseEvidence.length})
+                Evidence Collection ({evidence.length})
               </h2>
-              <Button className="gap-2">
-                <Shield className="w-4 h-4" />
-                Upload Evidence
-              </Button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {caseEvidence.map(evidence => (
-                <EvidenceCard key={evidence.id} evidence={evidence} />
+              {evidence.map(ev => (
+                <EvidenceCard key={ev.id} evidence={ev} />
               ))}
             </div>
 
-            {caseEvidence.length === 0 && (
+            {evidence.length === 0 && (
               <Card>
                 <CardContent className="py-12 text-center">
                   <Shield className="w-16 h-16 text-gray-600 mx-auto mb-4" />
@@ -373,13 +379,13 @@ export const CaseDetails = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-100">
-                Event Timeline ({caseEvents.length})
+                Event Timeline ({events.length})
               </h2>
             </div>
             
-            <Timeline events={caseEvents} />
+            <Timeline events={events} />
 
-            {caseEvents.length === 0 && (
+            {events.length === 0 && (
               <Card>
                 <CardContent className="py-12 text-center">
                   <Clock className="w-16 h-16 text-gray-600 mx-auto mb-4" />
@@ -401,19 +407,9 @@ export const CaseDetails = () => {
                   <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
                     <h4 className="text-red-400 font-semibold mb-2">Critical Findings</h4>
                     <ul className="space-y-2 text-sm text-gray-300">
-                      <li>• Multiple unauthorized access attempts detected</li>
-                      <li>• Suspicious data exfiltration patterns identified</li>
-                      <li>• Potential malware signatures found in logs</li>
-                    </ul>
-                  </div>
-
-                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                    <h4 className="text-yellow-400 font-semibold mb-2">Recommendations</h4>
-                    <ul className="space-y-2 text-sm text-gray-300">
-                      <li>• Implement additional access controls</li>
-                      <li>• Review and update firewall rules</li>
-                      <li>• Conduct security awareness training</li>
-                      <li>• Enable multi-factor authentication</li>
+                      <li>• {events.filter(e => e.severity === 'critical').length} critical security events detected</li>
+                      <li>• {evidence.length} pieces of evidence collected</li>
+                      <li>• Investigation ongoing</li>
                     </ul>
                   </div>
                 </div>

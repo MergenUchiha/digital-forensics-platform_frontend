@@ -1,27 +1,75 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CaseCard } from '@/components/cases/CaseCard';
 import { CreateCaseModal, CaseFormData } from '@/components/cases/CreateCaseModal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { mockCases } from '@/data/mockData';
+import { casesService } from '@/services/cases.service';
+import { Case } from '@/types';
 import { Plus, Search } from 'lucide-react';
 
 export const Cases = () => {
+  const [cases, setCases] = useState<Case[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const filteredCases = mockCases.filter(c => {
+  useEffect(() => {
+    fetchCases();
+  }, [statusFilter]);
+
+  const fetchCases = async () => {
+    try {
+      setIsLoading(true);
+      const data = await casesService.getAll(statusFilter === 'all' ? undefined : statusFilter);
+      setCases(data);
+    } catch (error) {
+      console.error('Failed to fetch cases:', error);
+      (window as any).showNotification?.({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to load cases',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreateCase = async (data: CaseFormData) => {
+    try {
+      await casesService.create(data);
+      await fetchCases();
+      (window as any).showNotification?.({
+        type: 'success',
+        title: 'Case Created',
+        message: `Case "${data.title}" has been successfully created`,
+      });
+    } catch (error) {
+      console.error('Failed to create case:', error);
+      (window as any).showNotification?.({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to create case',
+      });
+    }
+  };
+
+  const filteredCases = cases.filter(c => {
     const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          c.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
-  const handleCreateCase = (data: CaseFormData) => {
-    console.log('Creating case:', data);
-    // Здесь будет API вызов
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-cyber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading cases...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
