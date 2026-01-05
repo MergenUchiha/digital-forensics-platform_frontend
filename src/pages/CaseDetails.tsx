@@ -52,12 +52,15 @@ export const CaseDetails = () => {
   const fetchCaseData = async (caseId: string) => {
     try {
       setIsLoading(true);
+      console.log('Fetching case data for ID:', caseId);
+      
       const [caseResponse, evidenceResponse, eventsResponse] = await Promise.all([
         casesService.getById(caseId),
         evidenceService.getAll(caseId),
         timelineService.getAll(caseId),
       ]);
 
+      console.log('Case data received:', caseResponse);
       setCaseData(caseResponse);
       setEvidence(evidenceResponse);
       setEvents(eventsResponse);
@@ -69,12 +72,20 @@ export const CaseDetails = () => {
         severity: caseResponse.severity.toString().toUpperCase(),
         status: caseResponse.status.toString().toUpperCase(),
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch case data:', error);
+      
+      let errorMessage = 'Failed to load case details';
+      if (error.response?.status === 404) {
+        errorMessage = 'Case not found';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
       (window as any).showNotification?.({
         type: 'error',
         title: 'Error',
-        message: 'Failed to load case details',
+        message: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -83,11 +94,53 @@ export const CaseDetails = () => {
 
   const handleEditCase = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id) return;
+    if (!id || !caseData) return;
 
     try {
-      // Отправляем данные в правильном формате (уже в верхнем регистре)
-      await casesService.update(id, editFormData);
+      // Формируем данные для обновления - отправляем только измененные поля
+      const updateData: any = {};
+      
+      console.log('Current case data:', {
+        title: caseData.title,
+        description: caseData.description,
+        severity: caseData.severity,
+        status: caseData.status,
+      });
+      
+      console.log('Form data:', editFormData);
+      
+      if (editFormData.title !== caseData.title) {
+        updateData.title = editFormData.title;
+        console.log('Title changed:', editFormData.title);
+      }
+      if (editFormData.description !== caseData.description) {
+        updateData.description = editFormData.description;
+        console.log('Description changed');
+      }
+      if (editFormData.severity.toUpperCase() !== caseData.severity.toString().toUpperCase()) {
+        updateData.severity = editFormData.severity.toUpperCase();
+        console.log('Severity changed:', editFormData.severity.toUpperCase());
+      }
+      if (editFormData.status.toUpperCase() !== caseData.status.toString().toUpperCase()) {
+        updateData.status = editFormData.status.toUpperCase();
+        console.log('Status changed:', editFormData.status.toUpperCase());
+      }
+
+      // Если нет изменений
+      if (Object.keys(updateData).length === 0) {
+        (window as any).showNotification?.({
+          type: 'info',
+          title: 'No Changes',
+          message: 'No changes were made to the case',
+        });
+        setIsEditModalOpen(false);
+        return;
+      }
+
+      console.log('📤 Sending update request with data:', JSON.stringify(updateData, null, 2));
+      
+      const response = await casesService.update(id, updateData);
+      console.log('✅ Update response:', response);
       
       await fetchCaseData(id);
       setIsEditModalOpen(false);
@@ -98,18 +151,44 @@ export const CaseDetails = () => {
         message: 'Case has been successfully updated',
       });
     } catch (error: any) {
-      console.error('Failed to update case:', error);
+      console.error('❌ Failed to update case:', error);
+      console.error('Error response:', error.response?.data);
       
       let errorMessage = 'Failed to update case';
-      if (error.response?.data?.message) {
+      let errorDetails = '';
+      
+      if (error.response?.status === 400) {
+        const data = error.response.data;
+        console.log('400 error data:', data);
+        
+        if (data?.errors && Array.isArray(data.errors)) {
+          errorDetails = data.errors
+            .map((e: any) => `${e.field}: ${e.message}`)
+            .join('\n');
+          errorMessage = 'Validation errors:\n' + errorDetails;
+        } else if (data?.message) {
+          errorMessage = data.message;
+          if (data.errors) {
+            errorDetails = JSON.stringify(data.errors, null, 2);
+          }
+        } else {
+          errorMessage = 'Invalid data provided. Please check all fields.';
+          errorDetails = JSON.stringify(data, null, 2);
+        }
+      } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
-      } else if (error.response?.data?.errors) {
-        errorMessage = error.response.data.errors.map((e: any) => e.message || e).join(', ');
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      console.error('Error message:', errorMessage);
+      if (errorDetails) {
+        console.error('Error details:', errorDetails);
       }
       
       (window as any).showNotification?.({
         type: 'error',
-        title: 'Error',
+        title: 'Update Failed',
         message: errorMessage,
       });
     }
@@ -349,7 +428,7 @@ export const CaseDetails = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Case ID</p>
-                      <p className="text-gray-100 font-mono">{caseData.id}</p>
+                      <p className="text-gray-100 font-mono text-sm">{caseData.id}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Created</p>

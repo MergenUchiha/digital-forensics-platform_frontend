@@ -40,21 +40,44 @@ export const EvidenceCard = ({ evidence }: EvidenceCardProps) => {
   const type = evidence.type?.toUpperCase() || 'FILE';
 
   const handleDownload = () => {
-    // Simulate download
-    (window as any).showNotification?.({
-      type: 'info',
-      title: 'Download Started',
-      message: `Downloading ${evidence.name}...`,
-    });
+    // Создаем реальный файл для скачивания
+    const fileContent = `Evidence File: ${evidence.name}
+Type: ${type}
+Description: ${evidence.description || 'No description'}
+SHA-256: ${sha256}
+MD5: ${md5}
+Size: ${formatBytes(size)}
+Uploaded: ${formatDate(uploadedAt)}
+Uploaded By: ${evidence.uploadedBy?.name || 'Unknown'}
+
+This is a simulated evidence file for the Digital Forensics Platform.
+In a real system, this would contain the actual evidence data.`;
+
+    // Создаем blob из содержимого
+    const blob = new Blob([fileContent], { type: 'text/plain' });
     
-    // In a real app, this would trigger actual file download
-    setTimeout(() => {
-      (window as any).showNotification?.({
-        type: 'success',
-        title: 'Download Complete',
-        message: `${evidence.name} has been downloaded`,
-      });
-    }, 1000);
+    // Создаем URL для blob
+    const url = window.URL.createObjectURL(blob);
+    
+    // Создаем временную ссылку для скачивания
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = evidence.name || 'evidence.txt';
+    
+    // Добавляем в DOM, кликаем и удаляем
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Освобождаем URL
+    window.URL.revokeObjectURL(url);
+
+    // Показываем уведомление
+    (window as any).showNotification?.({
+      type: 'success',
+      title: 'Download Complete',
+      message: `${evidence.name} has been downloaded`,
+    });
   };
 
   return (
@@ -246,7 +269,10 @@ export const EvidenceCard = ({ evidence }: EvidenceCardProps) => {
             <Button 
               variant="primary" 
               className="flex-1 gap-2"
-              onClick={handleDownload}
+              onClick={() => {
+                handleDownload();
+                setIsDetailsModalOpen(false);
+              }}
             >
               <Download className="w-4 h-4" />
               Download Evidence
