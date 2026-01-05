@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
+import { Input } from '@/components/ui/Input';
 import { Timeline } from '@/components/timeline/Timeline';
 import { EvidenceCard } from '@/components/evidence/EvidenceCard';
 import { Case, EvidenceItem, TimelineEvent } from '@/types';
@@ -18,7 +20,6 @@ import {
   Edit,
   Download,
   Share2,
-  CheckCircle,
   Database
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -34,6 +35,13 @@ export const CaseDetails = () => {
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    title: '',
+    description: '',
+    severity: 'MEDIUM',
+    status: 'OPEN',
+  });
 
   useEffect(() => {
     if (id) {
@@ -53,6 +61,14 @@ export const CaseDetails = () => {
       setCaseData(caseResponse);
       setEvidence(evidenceResponse);
       setEvents(eventsResponse);
+      
+      // Set edit form data с правильным форматом
+      setEditFormData({
+        title: caseResponse.title,
+        description: caseResponse.description,
+        severity: caseResponse.severity.toString().toUpperCase(),
+        status: caseResponse.status.toString().toUpperCase(),
+      });
     } catch (error) {
       console.error('Failed to fetch case data:', error);
       (window as any).showNotification?.({
@@ -65,10 +81,61 @@ export const CaseDetails = () => {
     }
   };
 
+  const handleEditCase = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id) return;
+
+    try {
+      // Отправляем данные в правильном формате (уже в верхнем регистре)
+      await casesService.update(id, editFormData);
+      
+      await fetchCaseData(id);
+      setIsEditModalOpen(false);
+      
+      (window as any).showNotification?.({
+        type: 'success',
+        title: 'Case Updated',
+        message: 'Case has been successfully updated',
+      });
+    } catch (error: any) {
+      console.error('Failed to update case:', error);
+      
+      let errorMessage = 'Failed to update case';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.errors) {
+        errorMessage = error.response.data.errors.map((e: any) => e.message || e).join(', ');
+      }
+      
+      (window as any).showNotification?.({
+        type: 'error',
+        title: 'Error',
+        message: errorMessage,
+      });
+    }
+  };
+
   const handleExportPDF = () => {
     if (caseData) {
       exportCaseToPDF(caseData, evidence, events);
     }
+  };
+
+  const handleShare = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      (window as any).showNotification?.({
+        type: 'success',
+        title: 'Link Copied',
+        message: 'Case link has been copied to clipboard',
+      });
+    }).catch(() => {
+      (window as any).showNotification?.({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to copy link',
+      });
+    });
   };
 
   if (isLoading) {
@@ -99,18 +166,25 @@ export const CaseDetails = () => {
   }
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: Shield },
-    { id: 'evidence', label: 'Evidence', icon: Database, badge: evidence.length },
-    { id: 'timeline', label: 'Timeline', icon: Clock, badge: events.length },
-    { id: 'analysis', label: 'Analysis', icon: Activity },
-  ] as const;
+    { id: 'overview' as const, label: 'Overview', icon: Shield },
+    { id: 'evidence' as const, label: 'Evidence', icon: Database, badge: evidence.length },
+    { id: 'timeline' as const, label: 'Timeline', icon: Clock, badge: events.length },
+    { id: 'analysis' as const, label: 'Analysis', icon: Activity },
+  ];
 
   const severityColors: any = {
     critical: 'danger',
     high: 'warning',
     medium: 'info',
     low: 'success',
+    CRITICAL: 'danger',
+    HIGH: 'warning',
+    MEDIUM: 'info',
+    LOW: 'success',
   };
+
+  const severity = caseData.severity.toString().toLowerCase();
+  const status = caseData.status.toString().toLowerCase();
 
   return (
     <div className="space-y-6">
@@ -136,11 +210,11 @@ export const CaseDetails = () => {
             </div>
             
             <div className="flex gap-2">
-              <Badge variant={severityColors[caseData.severity]}>
-                {caseData.severity.toUpperCase()}
+              <Badge variant={severityColors[severity]}>
+                {severity.toUpperCase()}
               </Badge>
-              <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(caseData.status)}`}>
-                {caseData.status.replace('_', ' ').toUpperCase()}
+              <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
+                {status.replace('_', ' ').toUpperCase()}
               </div>
             </div>
           </div>
@@ -149,7 +223,7 @@ export const CaseDetails = () => {
 
       {/* Quick Actions */}
       <div className="flex gap-3">
-        <Button variant="primary" className="gap-2">
+        <Button variant="primary" className="gap-2" onClick={() => setIsEditModalOpen(true)}>
           <Edit className="w-4 h-4" />
           Edit Case
         </Button>
@@ -161,7 +235,7 @@ export const CaseDetails = () => {
           <Download className="w-4 h-4" />
           Export Report
         </Button>
-        <Button variant="secondary" className="gap-2">
+        <Button variant="secondary" className="gap-2" onClick={handleShare}>
           <Share2 className="w-4 h-4" />
           Share
         </Button>
@@ -201,7 +275,10 @@ export const CaseDetails = () => {
             <div>
               <p className="text-sm text-gray-400">Suspicious Activities</p>
               <p className="text-2xl font-bold text-gray-100">
-                {events.filter(e => e.severity === 'critical').length}
+                {events.filter(e => {
+                  const sev = e.severity.toString().toUpperCase();
+                  return sev === 'CRITICAL' || sev === 'HIGH';
+                }).length}
               </p>
             </div>
           </CardContent>
@@ -243,7 +320,7 @@ export const CaseDetails = () => {
               >
                 <Icon className="w-4 h-4" />
                 <span>{tab.label}</span>
-                {tab.badge !== undefined && (
+                {'badge' in tab && tab.badge !== undefined && (
                   <span className="px-2 py-0.5 bg-cyan-500/20 text-cyan-400 text-xs rounded-full">
                     {tab.badge}
                   </span>
@@ -288,31 +365,36 @@ export const CaseDetails = () => {
                     </div>
                   </div>
 
-                  {caseData.location && (
+                  {(caseData.location || (caseData.locationCity && caseData.locationCountry)) && (
                     <div className="pt-4 border-t border-gray-800">
                       <p className="text-sm text-gray-500 mb-2 flex items-center gap-2">
                         <MapPin className="w-4 h-4" />
                         Location
                       </p>
                       <p className="text-gray-100">
-                        {caseData.location.city}, {caseData.location.country}
+                        {caseData.location 
+                          ? `${caseData.location.city}, ${caseData.location.country}`
+                          : `${caseData.locationCity}, ${caseData.locationCountry}`
+                        }
                       </p>
                     </div>
                   )}
 
-                  <div className="pt-4 border-t border-gray-800">
-                    <p className="text-sm text-gray-500 mb-2">Tags</p>
-                    <div className="flex flex-wrap gap-2">
-                      {caseData.tags.map(tag => (
-                        <span 
-                          key={tag}
-                          className="px-3 py-1 bg-gray-800 text-gray-300 text-sm rounded-full"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
+                  {caseData.tags && caseData.tags.length > 0 && (
+                    <div className="pt-4 border-t border-gray-800">
+                      <p className="text-sm text-gray-500 mb-2">Tags</p>
+                      <div className="flex flex-wrap gap-2">
+                        {caseData.tags.map(tag => (
+                          <span 
+                            key={tag}
+                            className="px-3 py-1 bg-gray-800 text-gray-300 text-sm rounded-full"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -407,7 +489,10 @@ export const CaseDetails = () => {
                   <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
                     <h4 className="text-red-400 font-semibold mb-2">Critical Findings</h4>
                     <ul className="space-y-2 text-sm text-gray-300">
-                      <li>• {events.filter(e => e.severity === 'critical').length} critical security events detected</li>
+                      <li>• {events.filter(e => {
+                        const sev = e.severity.toString().toUpperCase();
+                        return sev === 'CRITICAL' || sev === 'HIGH';
+                      }).length} critical/high security events detected</li>
                       <li>• {evidence.length} pieces of evidence collected</li>
                       <li>• Investigation ongoing</li>
                     </ul>
@@ -418,6 +503,89 @@ export const CaseDetails = () => {
           </div>
         )}
       </motion.div>
+
+      {/* Edit Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Edit Case"
+        size="lg"
+      >
+        <form onSubmit={handleEditCase} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Case Title *
+            </label>
+            <Input
+              type="text"
+              value={editFormData.title}
+              onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Description *
+            </label>
+            <textarea
+              value={editFormData.description}
+              onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+              rows={4}
+              required
+              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Severity *
+              </label>
+              <select
+                value={editFormData.severity}
+                onChange={(e) => setEditFormData({ ...editFormData, severity: e.target.value })}
+                className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+              >
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+                <option value="CRITICAL">Critical</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Status *
+              </label>
+              <select
+                value={editFormData.status}
+                onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+              >
+                <option value="OPEN">Open</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="CLOSED">Closed</option>
+                <option value="ARCHIVED">Archived</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button type="submit" variant="primary" className="flex-1">
+              Save Changes
+            </Button>
+            <Button 
+              type="button" 
+              variant="secondary" 
+              onClick={() => setIsEditModalOpen(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

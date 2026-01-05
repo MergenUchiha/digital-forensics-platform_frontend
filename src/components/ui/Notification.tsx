@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { X, CheckCircle, AlertTriangle, Info, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -34,26 +34,35 @@ const colors = {
 export const Notification = ({ notification, onClose }: NotificationProps) => {
   const Icon = icons[notification.type];
   const [progress, setProgress] = useState(100);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const duration = notification.duration || 5000;
     const interval = 50;
     const decrement = (100 / duration) * interval;
 
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setProgress(prev => {
         const next = prev - decrement;
         if (next <= 0) {
-          clearInterval(timer);
-          onClose(notification.id);
+          if (timerRef.current) clearInterval(timerRef.current);
+          // Use setTimeout to avoid state update during render
+          setTimeout(() => onClose(notification.id), 0);
           return 0;
         }
         return next;
       });
     }, interval);
 
-    return () => clearInterval(timer);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, [notification.id, notification.duration, onClose]);
+
+  const handleClose = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    onClose(notification.id);
+  };
 
   return (
     <motion.div
@@ -69,7 +78,7 @@ export const Notification = ({ notification, onClose }: NotificationProps) => {
           <p className="text-sm text-gray-300">{notification.message}</p>
         </div>
         <button
-          onClick={() => onClose(notification.id)}
+          onClick={handleClose}
           className="text-gray-400 hover:text-white transition-colors"
         >
           <X className="w-4 h-4" />
@@ -91,12 +100,16 @@ export const Notification = ({ notification, onClose }: NotificationProps) => {
 export const NotificationContainer = () => {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
 
+  const handleClose = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
+
   useEffect(() => {
     // Глобальная функция для добавления уведомлений
     (window as any).showNotification = (data: Omit<NotificationData, 'id'>) => {
       const notification: NotificationData = {
         ...data,
-        id: Date.now().toString(),
+        id: `${Date.now()}-${Math.random()}`,
       };
       setNotifications(prev => [...prev, notification]);
     };
@@ -106,19 +119,16 @@ export const NotificationContainer = () => {
     };
   }, []);
 
-  const handleClose = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
-
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-3">
-      <AnimatePresence>
+    <div className="fixed top-4 right-4 z-50 space-y-3 pointer-events-none">
+      <AnimatePresence mode="sync">
         {notifications.map(notification => (
-          <Notification
-            key={notification.id}
-            notification={notification}
-            onClose={handleClose}
-          />
+          <div key={notification.id} className="pointer-events-auto">
+            <Notification
+              notification={notification}
+              onClose={handleClose}
+            />
+          </div>
         ))}
       </AnimatePresence>
     </div>

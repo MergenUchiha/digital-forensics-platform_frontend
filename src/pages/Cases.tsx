@@ -13,6 +13,7 @@ export const Cases = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCases();
@@ -21,14 +22,29 @@ export const Cases = () => {
   const fetchCases = async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const data = await casesService.getAll(statusFilter === 'all' ? undefined : statusFilter);
-      setCases(data);
-    } catch (error) {
+      
+      // Нормализуем данные для безопасного отображения
+      const normalizedData = data.map(c => ({
+        ...c,
+        severity: (c.severity || 'medium').toLowerCase(),
+        status: (c.status || 'open').toLowerCase(),
+        tags: c.tags || [],
+        evidenceCount: c.evidenceCount || c.stats?.evidenceCount || 0,
+        eventsCount: c.eventsCount || c.stats?.eventsCount || 0,
+        suspiciousActivities: c.suspiciousActivities || c.stats?.suspiciousActivities || 0,
+      }));
+      
+      setCases(normalizedData as Case[]);
+    } catch (error: any) {
       console.error('Failed to fetch cases:', error);
+      setError(error.response?.data?.message || 'Failed to load cases');
+      
       (window as any).showNotification?.({
         type: 'error',
         title: 'Error',
-        message: 'Failed to load cases',
+        message: 'Failed to load cases. Please try again.',
       });
     } finally {
       setIsLoading(false);
@@ -37,20 +53,39 @@ export const Cases = () => {
 
   const handleCreateCase = async (data: CaseFormData) => {
     try {
-      await casesService.create(data);
+      // Преобразуем данные в формат API
+      const apiData = {
+        title: data.title,
+        description: data.description,
+        severity: data.severity.toUpperCase() as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
+        status: (data.status || 'open').toUpperCase() as 'OPEN' | 'IN_PROGRESS' | 'CLOSED' | 'ARCHIVED',
+        tags: data.tags || [],
+        location: data.location,
+        assignedToId: data.assignedToId,
+      };
+
+      await casesService.create(apiData);
       await fetchCases();
+      
       (window as any).showNotification?.({
         type: 'success',
         title: 'Case Created',
         message: `Case "${data.title}" has been successfully created`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create case:', error);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.errors?.[0]?.message ||
+                          'Failed to create case';
+      
       (window as any).showNotification?.({
         type: 'error',
         title: 'Error',
-        message: 'Failed to create case',
+        message: errorMessage,
       });
+      
+      throw error;
     }
   };
 
@@ -66,6 +101,19 @@ export const Cases = () => {
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-cyber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-400">Loading cases...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="w-16 h-16 text-red-500 mx-auto mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-gray-100 mb-2">Error Loading Cases</h2>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <Button onClick={fetchCases}>Try Again</Button>
         </div>
       </div>
     );
