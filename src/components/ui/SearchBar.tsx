@@ -51,7 +51,7 @@ export const SearchBar = ({ placeholder = 'Search...', autoFocus = false }: Sear
           c.description.toLowerCase().includes(searchQuery) ||
           c.tags.some(tag => tag.toLowerCase().includes(searchQuery))) {
         foundResults.push({
-          id: c.id,
+          id: `case-${c.id}`, // Уникальный key
           type: 'case',
           title: c.title,
           subtitle: c.description,
@@ -66,7 +66,7 @@ export const SearchBar = ({ placeholder = 'Search...', autoFocus = false }: Sear
       if (e.name.toLowerCase().includes(searchQuery) || 
           e.description?.toLowerCase().includes(searchQuery)) {
         foundResults.push({
-          id: e.id,
+          id: `evidence-${e.id}`, // Уникальный key
           type: 'evidence',
           title: e.name,
           subtitle: e.description,
@@ -219,7 +219,7 @@ export const SearchBar = ({ placeholder = 'Search...', autoFocus = false }: Sear
               </div>
               {recentSearches.map((search, index) => (
                 <button
-                  key={index}
+                  key={`recent-${index}`}
                   onClick={() => handleRecentSearch(search)}
                   className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-800 transition-colors text-left"
                 >

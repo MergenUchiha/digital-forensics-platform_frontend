@@ -1,17 +1,16 @@
-// src/pages/Login.tsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Shield, Mail, Lock } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Shield, Mail, Lock, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -38,14 +37,46 @@ export const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Очищаем предыдущие ошибки
+    setErrors({});
+
     if (!validateForm()) return;
 
     setIsLoading(true);
     try {
       await login(email, password);
       navigate('/');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
+      
+      // Определяем сообщение об ошибке для пользователя
+      let errorMessage = 'Failed to login. Please try again.';
+      
+      if (error.response?.status === 401) {
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Account not found. Please check your email or register a new account.';
+      } else if (error.response?.status === 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (error.code === 'ERR_NETWORK') {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message && !error.message.includes('status code')) {
+        errorMessage = error.message;
+      }
+      
+      // Показываем ошибку в форме
+      setErrors({
+        general: errorMessage
+      });
+
+      // Также показываем toast уведомление
+      (window as any).showNotification?.({
+        type: 'error',
+        title: 'Login Failed',
+        message: errorMessage,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -71,6 +102,26 @@ export const Login = () => {
         <div className="bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-2xl p-8 shadow-2xl">
           <h2 className="text-2xl font-bold text-white mb-6">Sign In</h2>
 
+          {/* General Error Message */}
+          <AnimatePresence>
+            {errors.general && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                className="mb-4 overflow-hidden"
+              >
+                <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-red-400 mb-1">Login Error</p>
+                    <p className="text-sm text-red-300">{errors.general}</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
@@ -82,10 +133,15 @@ export const Login = () => {
                 <Input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setErrors(prev => ({ ...prev, email: undefined, general: undefined }));
+                  }}
                   placeholder="analyst@forensics.io"
                   className="pl-10"
                   error={errors.email}
+                  disabled={isLoading}
+                  autoComplete="email"
                 />
               </div>
             </div>
@@ -100,10 +156,15 @@ export const Login = () => {
                 <Input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setErrors(prev => ({ ...prev, password: undefined, general: undefined }));
+                  }}
                   placeholder="••••••••"
                   className="pl-10"
                   error={errors.password}
+                  disabled={isLoading}
+                  autoComplete="current-password"
                 />
               </div>
             </div>
@@ -112,7 +173,7 @@ export const Login = () => {
             <Button
               type="submit"
               variant="primary"
-              className="w-full"
+              className="w-full mt-6"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -132,7 +193,7 @@ export const Login = () => {
               Don't have an account?{' '}
               <Link
                 to="/register"
-                className="text-cyber-400 hover:text-cyber-300 font-medium"
+                className="text-cyber-400 hover:text-cyber-300 font-medium transition-colors"
               >
                 Sign up
               </Link>
@@ -141,15 +202,20 @@ export const Login = () => {
         </div>
 
         {/* Demo Credentials */}
-        <div className="mt-6 text-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="mt-6"
+        >
           <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
             <p className="text-blue-400 text-sm font-medium mb-2">Demo Credentials</p>
-            <p className="text-gray-400 text-xs">
-              Email: analyst@forensics.io<br />
-              Password: demo123
-            </p>
+            <div className="space-y-1 text-xs text-gray-400">
+              <p><span className="text-gray-500">Email:</span> analyst@forensics.io</p>
+              <p><span className="text-gray-500">Password:</span> demo123</p>
+            </div>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );

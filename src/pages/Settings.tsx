@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/services/api';
 import { User, Lock, Bell } from 'lucide-react';
 
 export const Settings = () => {
@@ -28,6 +29,22 @@ export const Settings = () => {
     securityAlerts: true,
   });
 
+  // Загружаем данные при монтировании
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: user.name,
+        email: user.email,
+      });
+    }
+
+    // Загружаем настройки уведомлений из localStorage
+    const savedNotifications = localStorage.getItem('notificationSettings');
+    if (savedNotifications) {
+      setNotificationSettings(JSON.parse(savedNotifications));
+    }
+  }, [user]);
+
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'security', label: 'Security', icon: Lock },
@@ -39,19 +56,29 @@ export const Settings = () => {
     setIsSaving(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Saving profile:', profileData);
+      
+      // Отправляем запрос на backend
+      const response = await api.put('/users/me', {
+        name: profileData.name,
+      });
+
+      console.log('Profile update response:', response.data);
 
       (window as any).showNotification?.({
         type: 'success',
         title: 'Profile Updated',
         message: 'Your profile has been successfully updated',
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Failed to save profile:', error);
+      
+      const errorMessage = error.response?.data?.message || 'Failed to update profile';
+      
       (window as any).showNotification?.({
         type: 'error',
         title: 'Error',
-        message: 'Failed to update profile',
+        message: errorMessage,
       });
     } finally {
       setIsSaving(false);
@@ -79,11 +106,27 @@ export const Settings = () => {
       return;
     }
 
+    if (!passwordData.currentPassword) {
+      (window as any).showNotification?.({
+        type: 'error',
+        title: 'Error',
+        message: 'Please enter your current password',
+      });
+      return;
+    }
+
     setIsSaving(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Updating password...');
+      
+      // Отправляем запрос на backend
+      await api.put('/users/me/password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      console.log('Password updated successfully');
 
       setPasswordData({
         currentPassword: '',
@@ -96,11 +139,21 @@ export const Settings = () => {
         title: 'Password Updated',
         message: 'Your password has been successfully updated',
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Failed to update password:', error);
+      
+      let errorMessage = 'Failed to update password';
+      
+      if (error.response?.status === 401) {
+        errorMessage = 'Current password is incorrect';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
       (window as any).showNotification?.({
         type: 'error',
         title: 'Error',
-        message: 'Failed to update password',
+        message: errorMessage,
       });
     } finally {
       setIsSaving(false);
@@ -112,8 +165,13 @@ export const Settings = () => {
     setIsSaving(true);
 
     try {
+      // Сохраняем в localStorage (в реальном приложении отправляли бы на backend)
+      localStorage.setItem('notificationSettings', JSON.stringify(notificationSettings));
+      
+      console.log('Saving notification settings:', notificationSettings);
+      
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       (window as any).showNotification?.({
         type: 'success',
@@ -121,6 +179,7 @@ export const Settings = () => {
         message: 'Your notification preferences have been saved',
       });
     } catch (error) {
+      console.error('Failed to save notification settings:', error);
       (window as any).showNotification?.({
         type: 'error',
         title: 'Error',
@@ -228,7 +287,7 @@ export const Settings = () => {
                 <form onSubmit={handleUpdatePassword} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Current Password
+                      Current Password *
                     </label>
                     <Input
                       type="password"
@@ -241,20 +300,20 @@ export const Settings = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      New Password
+                      New Password *
                     </label>
                     <Input
                       type="password"
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                      placeholder="Enter new password"
+                      placeholder="Enter new password (min 6 characters)"
                       required
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Confirm New Password
+                      Confirm New Password *
                     </label>
                     <Input
                       type="password"
@@ -263,6 +322,12 @@ export const Settings = () => {
                       placeholder="Confirm new password"
                       required
                     />
+                  </div>
+
+                  <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <p className="text-sm text-blue-400">
+                      ℹ️ Your password must be at least 6 characters long. Make sure to remember it!
+                    </p>
                   </div>
 
                   <div className="pt-4">
@@ -294,7 +359,7 @@ export const Settings = () => {
                         ...notificationSettings, 
                         emailNotifications: e.target.checked 
                       })}
-                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-cyber-500 focus:ring-cyber-500"
+                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-cyber-500 focus:ring-cyber-500 cursor-pointer"
                     />
                   </div>
 
@@ -310,7 +375,7 @@ export const Settings = () => {
                         ...notificationSettings, 
                         caseUpdates: e.target.checked 
                       })}
-                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-cyber-500 focus:ring-cyber-500"
+                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-cyber-500 focus:ring-cyber-500 cursor-pointer"
                     />
                   </div>
 
@@ -326,7 +391,7 @@ export const Settings = () => {
                         ...notificationSettings, 
                         evidenceUploads: e.target.checked 
                       })}
-                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-cyber-500 focus:ring-cyber-500"
+                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-cyber-500 focus:ring-cyber-500 cursor-pointer"
                     />
                   </div>
 
@@ -342,7 +407,7 @@ export const Settings = () => {
                         ...notificationSettings, 
                         securityAlerts: e.target.checked 
                       })}
-                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-cyber-500 focus:ring-cyber-500"
+                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-cyber-500 focus:ring-cyber-500 cursor-pointer"
                     />
                   </div>
 
