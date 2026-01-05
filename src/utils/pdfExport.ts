@@ -39,15 +39,18 @@ export const exportCaseToPDF = (
   const caseInfo = [
     ['Case ID', caseData.id],
     ['Title', caseData.title],
-    ['Status', caseData.status.toUpperCase()],
-    ['Severity', caseData.severity.toUpperCase()],
+    ['Status', caseData.status.toString().toUpperCase()],
+    ['Severity', caseData.severity.toString().toUpperCase()],
     ['Created', formatDate(caseData.createdAt)],
     ['Last Updated', formatDate(caseData.updatedAt)],
     ['Assigned To', caseData.assignedTo?.name || 'Unassigned'],
   ];
 
+  // Handle location - check both formats
   if (caseData.location) {
     caseInfo.push(['Location', `${caseData.location.city}, ${caseData.location.country}`]);
+  } else if (caseData.locationCity && caseData.locationCountry) {
+    caseInfo.push(['Location', `${caseData.locationCity}, ${caseData.locationCountry}`]);
   }
 
   autoTable(doc, {
@@ -76,7 +79,7 @@ export const exportCaseToPDF = (
   yPosition += splitDescription.length * 5 + 10;
 
   // Tags
-  if (caseData.tags.length > 0) {
+  if (caseData.tags && caseData.tags.length > 0) {
     doc.setFontSize(12);
     doc.setTextColor(...darkGray);
     doc.text('Tags', 20, yPosition);
@@ -100,12 +103,25 @@ export const exportCaseToPDF = (
   yPosition += 8;
 
   if (evidence.length > 0) {
-    const evidenceData = evidence.map(e => [
-      e.name,
-      e.type,
-      formatDate(e.uploadedAt),
-      e.hash.sha256.substring(0, 16) + '...',
-    ]);
+    const evidenceData = evidence.map(e => {
+      // Safely get hash - check multiple possible locations
+      let hash = 'N/A';
+      if (e.sha256Hash) {
+        hash = e.sha256Hash;
+      } else if (e.hash && e.hash.sha256) {
+        hash = e.hash.sha256;
+      }
+      
+      // Truncate hash for display
+      const displayHash = hash !== 'N/A' ? hash.substring(0, 16) + '...' : 'N/A';
+      
+      return [
+        e.name || 'Unnamed',
+        e.type?.toString() || 'Unknown',
+        formatDate(e.uploadedAt || new Date().toISOString()),
+        displayHash,
+      ];
+    });
 
     autoTable(doc, {
       startY: yPosition,
@@ -139,9 +155,9 @@ export const exportCaseToPDF = (
   if (events.length > 0) {
     const timelineData = events.slice(0, 10).map(e => [
       formatDate(e.timestamp),
-      e.severity.toUpperCase(),
-      e.title,
-      e.source,
+      e.severity?.toString().toUpperCase() || 'INFO',
+      e.title || 'Untitled Event',
+      e.source || 'Unknown',
     ]);
 
     autoTable(doc, {
@@ -167,7 +183,7 @@ export const exportCaseToPDF = (
     yPosition += 10;
   }
 
-  // Footer on last page
+  // Footer on all pages
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);

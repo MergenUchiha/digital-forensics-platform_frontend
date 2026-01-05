@@ -7,7 +7,7 @@ import { Modal } from '@/components/ui/Modal';
 import { evidenceService } from '@/services/evidence.service';
 import { casesService } from '@/services/cases.service';
 import { EvidenceItem, Case } from '@/types';
-import { Filter, Upload } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const Evidence = () => {
@@ -17,6 +17,8 @@ export const Evidence = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCase, setSelectedCase] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [uploadData, setUploadData] = useState({
     name: '',
     type: 'LOG' as const,
@@ -97,12 +99,21 @@ export const Evidence = () => {
     }
   };
 
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedCase('all');
+    setTypeFilter('all');
+  };
+
   const filteredEvidence = evidence.filter(e => {
     const matchesSearch = e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          e.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCase = selectedCase === 'all' || e.caseId === selectedCase;
-    return matchesSearch && matchesCase;
+    const matchesType = typeFilter === 'all' || e.type.toUpperCase() === typeFilter;
+    return matchesSearch && matchesCase && matchesType;
   });
+
+  const hasActiveFilters = selectedCase !== 'all' || typeFilter !== 'all' || searchQuery !== '';
 
   if (isLoading) {
     return (
@@ -126,31 +137,96 @@ export const Evidence = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
-          <Input
-            type="text"
-            placeholder="Search evidence..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <Input
+              type="text"
+              placeholder="Search evidence..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2">
+            <select
+              value={selectedCase}
+              onChange={(e) => setSelectedCase(e.target.value)}
+              className="px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+            >
+              <option value="all">All Cases</option>
+              {cases.map(c => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))}
+            </select>
+            <Button 
+              variant={isFilterOpen ? 'primary' : 'secondary'} 
+              className="gap-2"
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+            >
+              Filters
+              {hasActiveFilters && (
+                <span className="ml-1 px-1.5 py-0.5 bg-cyber-500 text-white text-xs rounded-full">
+                  {[selectedCase !== 'all', typeFilter !== 'all', searchQuery !== ''].filter(Boolean).length}
+                </span>
+              )}
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <select
-            value={selectedCase}
-            onChange={(e) => setSelectedCase(e.target.value)}
-            className="px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+
+        {/* Advanced Filters */}
+        {isFilterOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="p-4 bg-gray-900 border border-gray-800 rounded-lg"
           >
-            <option value="all">All Cases</option>
-            {cases.map(c => (
-              <option key={c.id} value={c.id}>{c.title}</option>
-            ))}
-          </select>
-          <Button variant="secondary" className="gap-2">
-            <Filter className="w-4 h-4" />
-            Filters
-          </Button>
-        </div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-gray-200">Advanced Filters</h3>
+              {hasActiveFilters && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={clearFilters}
+                  className="gap-2"
+                >
+                  <X className="w-4 h-4" />
+                  Clear All
+                </Button>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Evidence Type
+                </label>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+                >
+                  <option value="all">All Types</option>
+                  <option value="LOG">Log</option>
+                  <option value="NETWORK_CAPTURE">Network Capture</option>
+                  <option value="DISK_IMAGE">Disk Image</option>
+                  <option value="MEMORY_DUMP">Memory Dump</option>
+                  <option value="FILE">File</option>
+                  <option value="API_RESPONSE">API Response</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Results
+                </label>
+                <div className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400">
+                  {filteredEvidence.length} of {evidence.length} items
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
 
       {/* Upload Zone */}
@@ -182,7 +258,19 @@ export const Evidence = () => {
 
       {filteredEvidence.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-400">No evidence found</p>
+          <p className="text-gray-400">
+            {hasActiveFilters ? 'No evidence found matching your filters' : 'No evidence found'}
+          </p>
+          {hasActiveFilters && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={clearFilters}
+              className="mt-4"
+            >
+              Clear Filters
+            </Button>
+          )}
         </div>
       )}
 

@@ -1,31 +1,146 @@
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { Modal } from '@/components/ui/Modal';
 import { FileText, Download, Eye, Plus } from 'lucide-react';
 import { formatDate } from '@/utils/format';
+import { casesService } from '@/services/cases.service';
+import { evidenceService } from '@/services/evidence.service';
+import { timelineService } from '@/services/timeline.service';
+import { exportCaseToPDF } from '@/utils/pdfExport';
+import { Case } from '@/types';
 
-const mockReports = [
-  {
-    id: '1',
-    title: 'AWS S3 Breach Investigation Report',
-    caseId: '1',
-    caseName: 'AWS S3 Bucket Data Breach',
-    generatedAt: '2024-12-26T10:00:00Z',
-    format: 'PDF',
-    size: '2.4 MB',
-  },
-  {
-    id: '2',
-    title: 'IoT Botnet Analysis Summary',
-    caseId: '2',
-    caseName: 'IoT Camera Botnet Activity',
-    generatedAt: '2024-12-25T16:30:00Z',
-    format: 'PDF',
-    size: '1.8 MB',
-  },
-];
+interface Report {
+  id: string;
+  title: string;
+  caseId: string;
+  caseName: string;
+  generatedAt: string;
+  format: string;
+  size: string;
+}
 
 export const Reports = () => {
+  const [reports, setReports] = useState<Report[]>([]);
+  const [cases, setCases] = useState<Case[]>([]);
+  const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+  const [selectedCaseId, setSelectedCaseId] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const casesData = await casesService.getAll();
+      setCases(casesData);
+      
+      // Load saved reports from localStorage
+      const savedReports = localStorage.getItem('forensics_reports');
+      if (savedReports) {
+        setReports(JSON.parse(savedReports));
+      }
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
+  };
+
+  const handleGenerateReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedCaseId) {
+      (window as any).showNotification?.({
+        type: 'error',
+        title: 'Error',
+        message: 'Please select a case',
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    
+    try {
+      // Fetch case data
+      const [caseData, evidence, events] = await Promise.all([
+        casesService.getById(selectedCaseId),
+        evidenceService.getAll(selectedCaseId),
+        timelineService.getAll(selectedCaseId),
+      ]);
+
+      // Generate PDF
+      exportCaseToPDF(caseData, evidence, events);
+
+      // Create report record
+      const newReport: Report = {
+        id: `report-${Date.now()}`,
+        title: `${caseData.title} - Investigation Report`,
+        caseId: caseData.id,
+        caseName: caseData.title,
+        generatedAt: new Date().toISOString(),
+        format: 'PDF',
+        size: '2.4 MB',
+      };
+
+      const updatedReports = [...reports, newReport];
+      setReports(updatedReports);
+      
+      // Save to localStorage
+      localStorage.setItem('forensics_reports', JSON.stringify(updatedReports));
+
+      setIsGenerateModalOpen(false);
+      setSelectedCaseId('');
+
+      (window as any).showNotification?.({
+        type: 'success',
+        title: 'Report Generated',
+        message: 'Report has been successfully generated and downloaded',
+      });
+    } catch (error) {
+      console.error('Failed to generate report:', error);
+      (window as any).showNotification?.({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to generate report',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleViewReport = (report: Report) => {
+    setSelectedReport(report);
+    setIsPreviewModalOpen(true);
+  };
+
+  const handleDownloadReport = async (report: Report) => {
+    try {
+      const [caseData, evidence, events] = await Promise.all([
+        casesService.getById(report.caseId),
+        evidenceService.getAll(report.caseId),
+        timelineService.getAll(report.caseId),
+      ]);
+
+      exportCaseToPDF(caseData, evidence, events);
+
+      (window as any).showNotification?.({
+        type: 'success',
+        title: 'Report Downloaded',
+        message: 'Report has been downloaded successfully',
+      });
+    } catch (error) {
+      console.error('Failed to download report:', error);
+      (window as any).showNotification?.({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to download report',
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -34,7 +149,7 @@ export const Reports = () => {
           <h1 className="text-3xl font-bold text-gray-100">Reports</h1>
           <p className="text-gray-400 mt-1">Generate and manage investigation reports</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setIsGenerateModalOpen(true)}>
           <Plus className="w-4 h-4" />
           Generate Report
         </Button>
@@ -42,42 +157,63 @@ export const Reports = () => {
 
       {/* Reports List */}
       <div className="space-y-4">
-        {mockReports.map((report) => (
-          <Card key={report.id}>
-            <CardContent className="flex items-center justify-between">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-blue-500/10 rounded-lg">
-                  <FileText className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-100 mb-1">
-                    {report.title}
-                  </h3>
-                  <p className="text-sm text-gray-400 mb-2">
-                    Case: {report.caseName}
-                  </p>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <span>Generated {formatDate(report.generatedAt)}</span>
-                    <Badge variant="info">{report.format}</Badge>
-                    <span>{report.size}</span>
+        {reports.length > 0 ? (
+          reports.map((report) => (
+            <Card key={report.id}>
+              <CardContent className="flex items-center justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-blue-500/10 rounded-lg">
+                    <FileText className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-100 mb-1">
+                      {report.title}
+                    </h3>
+                    <p className="text-sm text-gray-400 mb-2">
+                      Case: {report.caseName}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span>Generated {formatDate(report.generatedAt)}</span>
+                      <Badge variant="info">{report.format}</Badge>
+                      <span>{report.size}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm">
-                  <Eye className="w-4 h-4" />
-                </Button>
-                <Button variant="secondary" size="sm" className="gap-2">
-                  <Download className="w-4 h-4" />
-                  Download
-                </Button>
-              </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleViewReport(report)}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    className="gap-2"
+                    onClick={() => handleDownloadReport(report)}
+                  >
+                    <Download className="w-4 h-4" />
+                    Download
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <FileText className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-400 mb-4">No reports generated yet</p>
+              <Button onClick={() => setIsGenerateModalOpen(true)}>
+                Generate Your First Report
+              </Button>
             </CardContent>
           </Card>
-        ))}
+        )}
       </div>
 
-      {/* Report Template */}
+      {/* Report Templates */}
       <Card>
         <CardContent>
           <h3 className="text-lg font-semibold text-gray-100 mb-4">Report Templates</h3>
@@ -86,6 +222,7 @@ export const Reports = () => {
               <div
                 key={template}
                 className="p-4 bg-gray-900 rounded-lg border border-gray-800 hover:border-cyber-500/50 cursor-pointer transition-all"
+                onClick={() => setIsGenerateModalOpen(true)}
               >
                 <FileText className="w-8 h-8 text-cyber-400 mb-2" />
                 <h4 className="font-medium text-gray-100">{template}</h4>
@@ -97,6 +234,136 @@ export const Reports = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Generate Report Modal */}
+      <Modal
+        isOpen={isGenerateModalOpen}
+        onClose={() => setIsGenerateModalOpen(false)}
+        title="Generate Report"
+        size="md"
+      >
+        <form onSubmit={handleGenerateReport} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Select Case *
+            </label>
+            <select
+              value={selectedCaseId}
+              onChange={(e) => setSelectedCaseId(e.target.value)}
+              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+              required
+            >
+              <option value="">Select a case...</option>
+              {cases.map(c => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Report Format
+            </label>
+            <select
+              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+            >
+              <option value="pdf">PDF Document</option>
+            </select>
+          </div>
+
+          <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+            <p className="text-sm text-blue-400">
+              The report will include case details, evidence list, timeline events, and analysis summary.
+            </p>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button 
+              type="submit" 
+              variant="primary" 
+              className="flex-1"
+              disabled={isGenerating}
+            >
+              {isGenerating ? 'Generating...' : 'Generate Report'}
+            </Button>
+            <Button 
+              type="button" 
+              variant="secondary" 
+              onClick={() => setIsGenerateModalOpen(false)}
+              className="flex-1"
+              disabled={isGenerating}
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Preview Modal */}
+      <Modal
+        isOpen={isPreviewModalOpen}
+        onClose={() => setIsPreviewModalOpen(false)}
+        title="Report Preview"
+        size="lg"
+      >
+        {selectedReport && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-100">{selectedReport.title}</h3>
+              <p className="text-sm text-gray-400 mt-1">Case: {selectedReport.caseName}</p>
+            </div>
+
+            <div className="p-4 bg-gray-900 border border-gray-800 rounded-lg">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500">Generated</p>
+                  <p className="text-gray-200">{formatDate(selectedReport.generatedAt)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Format</p>
+                  <p className="text-gray-200">{selectedReport.format}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Size</p>
+                  <p className="text-gray-200">{selectedReport.size}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Status</p>
+                  <Badge variant="success">Ready</Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <p className="text-sm text-blue-400">
+                This report contains comprehensive case information including evidence, timeline events, and analysis.
+                Click Download to get the full PDF report.
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button 
+                variant="primary" 
+                className="flex-1 gap-2"
+                onClick={() => {
+                  handleDownloadReport(selectedReport);
+                  setIsPreviewModalOpen(false);
+                }}
+              >
+                <Download className="w-4 h-4" />
+                Download Report
+              </Button>
+              <Button 
+                variant="secondary" 
+                onClick={() => setIsPreviewModalOpen(false)}
+                className="flex-1"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

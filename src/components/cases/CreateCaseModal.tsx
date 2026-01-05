@@ -2,19 +2,18 @@ import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { CaseStatus, CaseSeverity } from '@/types';
 
 interface CreateCaseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CaseFormData) => Promise<void>;
+  onSubmit: (data: any) => Promise<void>;
 }
 
 export interface CaseFormData {
   title: string;
   description: string;
-  severity: CaseSeverity;
-  status?: CaseStatus;
+  severity: string;
+  status?: string;
   tags?: string[];
   location?: {
     city: string;
@@ -29,8 +28,8 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
   const [formData, setFormData] = useState<CaseFormData>({
     title: '',
     description: '',
-    severity: 'medium',
-    status: 'open',
+    severity: 'MEDIUM',
+    status: 'OPEN',
     tags: [],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,14 +40,15 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
     setIsSubmitting(true);
     
     try {
+      // Отправляем данные напрямую в правильном формате
       await onSubmit(formData);
       
       // Reset form
       setFormData({
         title: '',
         description: '',
-        severity: 'medium',
-        status: 'open',
+        severity: 'MEDIUM',
+        status: 'OPEN',
         tags: [],
       });
       setTagInput('');
@@ -117,13 +117,13 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
             </label>
             <select
               value={formData.severity}
-              onChange={(e) => setFormData({ ...formData, severity: e.target.value as CaseSeverity })}
+              onChange={(e) => setFormData({ ...formData, severity: e.target.value })}
               className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent transition-all duration-200"
             >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-              <option value="critical">Critical</option>
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+              <option value="CRITICAL">Critical</option>
             </select>
           </div>
 
@@ -133,13 +133,13 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
             </label>
             <select
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as CaseStatus })}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent transition-all duration-200"
             >
-              <option value="open">Open</option>
-              <option value="in_progress">In Progress</option>
-              <option value="closed">Closed</option>
-              <option value="archived">Archived</option>
+              <option value="OPEN">Open</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="CLOSED">Closed</option>
+              <option value="ARCHIVED">Archived</option>
             </select>
           </div>
         </div>

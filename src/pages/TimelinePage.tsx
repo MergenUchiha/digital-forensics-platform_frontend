@@ -7,7 +7,7 @@ import { Modal } from '@/components/ui/Modal';
 import { timelineService } from '@/services/timeline.service';
 import { casesService } from '@/services/cases.service';
 import { TimelineEvent, Case } from '@/types';
-import { Filter, Download, Plus } from 'lucide-react';
+import { Download, Plus } from 'lucide-react';
 
 export const TimelinePage = () => {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
@@ -19,9 +19,9 @@ export const TimelinePage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newEvent, setNewEvent] = useState({
     timestamp: new Date().toISOString().slice(0, 16),
-    type: 'system' as const,
+    type: 'SYSTEM' as const,
     source: '',
-    severity: 'info' as const,
+    severity: 'INFO' as const,
     title: '',
     description: '',
     caseId: '',
@@ -68,14 +68,33 @@ export const TimelinePage = () => {
     }
 
     try {
-      await timelineService.create(newEvent);
+      // Преобразуем timestamp в ISO формат
+      const isoTimestamp = new Date(newEvent.timestamp).toISOString();
+      
+      // Форматируем данные для API
+      const apiData = {
+        timestamp: isoTimestamp,
+        type: newEvent.type.toUpperCase(),
+        source: newEvent.source,
+        severity: newEvent.severity.toUpperCase(),
+        title: newEvent.title,
+        description: newEvent.description,
+        caseId: newEvent.caseId,
+        metadata: {},
+        ipAddresses: [],
+        usernames: [],
+        files: [],
+        devices: [],
+      };
+
+      await timelineService.create(apiData);
       await fetchData();
       setIsCreateModalOpen(false);
       setNewEvent({
         timestamp: new Date().toISOString().slice(0, 16),
-        type: 'system',
+        type: 'SYSTEM',
         source: '',
-        severity: 'info',
+        severity: 'INFO',
         title: '',
         description: '',
         caseId: '',
@@ -86,12 +105,15 @@ export const TimelinePage = () => {
         title: 'Event Created',
         message: 'Timeline event has been successfully created',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create event:', error);
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.errors?.[0]?.message ||
+                          'Failed to create event';
       (window as any).showNotification?.({
         type: 'error',
         title: 'Error',
-        message: 'Failed to create event',
+        message: errorMessage,
       });
     }
   };
@@ -163,23 +185,23 @@ export const TimelinePage = () => {
                 All
               </Button>
               <Button
-                variant={severityFilter === 'critical' ? 'primary' : 'ghost'}
+                variant={severityFilter === 'CRITICAL' ? 'primary' : 'ghost'}
                 size="sm"
-                onClick={() => setSeverityFilter('critical')}
+                onClick={() => setSeverityFilter('CRITICAL')}
               >
                 Critical
               </Button>
               <Button
-                variant={severityFilter === 'warning' ? 'primary' : 'ghost'}
+                variant={severityFilter === 'HIGH' ? 'primary' : 'ghost'}
                 size="sm"
-                onClick={() => setSeverityFilter('warning')}
+                onClick={() => setSeverityFilter('HIGH')}
               >
-                Warning
+                High
               </Button>
               <Button
-                variant={severityFilter === 'info' ? 'primary' : 'ghost'}
+                variant={severityFilter === 'INFO' ? 'primary' : 'ghost'}
                 size="sm"
-                onClick={() => setSeverityFilter('info')}
+                onClick={() => setSeverityFilter('INFO')}
               >
                 Info
               </Button>
@@ -246,12 +268,12 @@ export const TimelinePage = () => {
                 className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
                 required
               >
-                <option value="authentication">Authentication</option>
-                <option value="network">Network</option>
-                <option value="file_access">File Access</option>
-                <option value="system">System</option>
-                <option value="api_call">API Call</option>
-                <option value="alert">Alert</option>
+                <option value="AUTHENTICATION">Authentication</option>
+                <option value="NETWORK">Network</option>
+                <option value="FILE_ACCESS">File Access</option>
+                <option value="SYSTEM">System</option>
+                <option value="API_CALL">API Call</option>
+                <option value="ALERT">Alert</option>
               </select>
             </div>
           </div>
@@ -279,9 +301,10 @@ export const TimelinePage = () => {
                 className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
                 required
               >
-                <option value="info">Info</option>
-                <option value="warning">Warning</option>
-                <option value="critical">Critical</option>
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+                <option value="CRITICAL">Critical</option>
               </select>
             </div>
           </div>
