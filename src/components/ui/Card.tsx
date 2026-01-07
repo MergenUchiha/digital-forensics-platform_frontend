@@ -17,17 +17,25 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
           // Базовые стили
           'rounded-xl p-6 transition-all duration-300',
           
-          // Фон и границы
-          'bg-light-bg-secondary dark:bg-dark-bg-secondary',
-          'border border-light-border-primary dark:border-dark-border-primary',
+          // Dark theme
+          'dark:bg-dark-bg-secondary',
+          'dark:border dark:border-dark-border-primary',
+          'dark:shadow-dark-lg',
           
-          // Тени
-          'shadow-light-lg dark:shadow-dark-lg',
+          // Light theme
+          'bg-light-bg-secondary',
+          'border border-light-border-primary',
+          'shadow-light-lg',
           
           // Hover эффекты (если hoverable)
           hoverable && [
-            'hover:shadow-light-xl dark:hover:shadow-dark-xl',
-            'hover:border-light-border-secondary dark:hover:border-dark-border-secondary',
+            // Dark
+            'dark:hover:shadow-dark-xl',
+            'dark:hover:border-dark-border-secondary',
+            // Light
+            'hover:shadow-light-xl',
+            'hover:border-light-border-secondary',
+            // Common
             'hover-lift cursor-pointer',
           ],
           
@@ -55,7 +63,10 @@ export const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEleme
       ref={ref} 
       className={cn(
         'mb-4 pb-4',
-        'border-b border-light-border-primary dark:border-dark-border-primary',
+        // Dark theme
+        'dark:border-b dark:border-dark-border-primary',
+        // Light theme
+        'border-b border-light-border-primary',
         className
       )} 
       {...props} 
@@ -71,7 +82,10 @@ export const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadi
       ref={ref} 
       className={cn(
         'text-xl font-semibold',
-        'text-light-text-primary dark:text-dark-text-primary',
+        // Dark theme
+        'dark:text-dark-text-primary',
+        // Light theme
+        'text-light-text-primary',
         className
       )} 
       {...props} 
@@ -86,7 +100,10 @@ export const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElem
     <div 
       ref={ref} 
       className={cn(
-        'text-light-text-secondary dark:text-dark-text-secondary',
+        // Dark theme
+        'dark:text-dark-text-secondary',
+        // Light theme
+        'text-light-text-secondary',
         className
       )} 
       {...props} 
@@ -102,7 +119,10 @@ export const CardFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEleme
       ref={ref} 
       className={cn(
         'mt-4 pt-4',
-        'border-t border-light-border-primary dark:border-dark-border-primary',
+        // Dark theme
+        'dark:border-t dark:border-dark-border-primary',
+        // Light theme
+        'border-t border-light-border-primary',
         className
       )} 
       {...props} 

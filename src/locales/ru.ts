@@ -249,4 +249,58 @@ export const ru = {
     api_call: 'Вызов API',
     alert: 'Оповещение',
   },
+
+  // Buttons and actions
+  buttons: {
+    save: 'Сохранить',
+    saveChanges: 'Сохранить изменения',
+    cancel: 'Отмена',
+    delete: 'Удалить',
+    edit: 'Редактировать',
+    close: 'Закрыть',
+    create: 'Создать',
+    update: 'Обновить',
+    submit: 'Отправить',
+    download: 'Скачать',
+    upload: 'Загрузить',
+    export: 'Экспорт',
+    import: 'Импорт',
+    filter: 'Фильтр',
+    search: 'Поиск',
+    viewDetails: 'Просмотр деталей',
+    viewAll: 'Показать все',
+    addNew: 'Добавить',
+    remove: 'Удалить',
+    confirm: 'Подтвердить',
+    back: 'Назад',
+    next: 'Далее',
+    previous: 'Предыдущий',
+    finish: 'Завершить',
+    skip: 'Пропустить',
+    retry: 'Повторить',
+    refresh: 'Обновить',
+  },
+
+  // Modals
+  modals: {
+    confirmDelete: 'Подтверждение удаления',
+    confirmAction: 'Подтверждение действия',
+    areYouSure: 'Вы уверены?',
+    cannotBeUndone: 'Это действие нельзя отменить.',
+  },
+
+  // Messages
+  messages: {
+    noData: 'Нет данных',
+    noResults: 'Результаты не найдены',
+    loadingData: 'Загрузка данных...',
+    savingChanges: 'Сохранение изменений...',
+    deletingItem: 'Удаление элемента...',
+    uploadingFile: 'Загрузка файла...',
+    processingRequest: 'Обработка запроса...',
+    operationSuccess: 'Операция выполнена успешно',
+    operationFailed: 'Операция не удалась',
+    pleaseWait: 'Пожалуйста, подождите...',
+    tryAgain: 'Пожалуйста, попробуйте снова',
+  },
 };

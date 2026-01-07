@@ -18,42 +18,75 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     children, 
     ...props 
   }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseStyles = cn(
+      'inline-flex items-center justify-center rounded-lg font-medium',
+      'transition-all duration-200',
+      'disabled:opacity-50 disabled:cursor-not-allowed',
+      'focus:outline-none focus:ring-2 focus:ring-offset-2',
+    );
     
     const variants = {
       primary: cn(
+        // Dark theme
         'bg-cyber-500 hover:bg-cyber-600 text-white',
-        'shadow-glow-cyan hover:shadow-glow-cyan',
+        'dark:shadow-glow-cyan dark:hover:shadow-glow-cyan-lg',
+        'dark:focus:ring-cyber-500 dark:focus:ring-offset-dark-bg-primary',
+        // Light theme
+        'shadow-light-md hover:shadow-light-lg',
+        'focus:ring-cyber-500 focus:ring-offset-light-bg-primary',
+        // Common
         'hover:scale-105 active:scale-95',
-        'disabled:hover:scale-100'
+        'disabled:hover:scale-100',
       ),
       secondary: cn(
-        'bg-light-bg-tertiary hover:bg-light-bg-hover',
+        // Dark theme
         'dark:bg-dark-bg-tertiary dark:hover:bg-dark-bg-hover',
-        'text-light-text-primary dark:text-dark-text-primary',
-        'border border-light-border-primary dark:border-dark-border-primary',
-        'hover:border-light-border-secondary dark:hover:border-dark-border-secondary',
+        'dark:text-dark-text-primary',
+        'dark:border dark:border-dark-border-primary dark:hover:border-dark-border-secondary',
+        'dark:shadow-dark-sm dark:hover:shadow-dark-md',
+        'dark:focus:ring-dark-accent-primary dark:focus:ring-offset-dark-bg-primary',
+        // Light theme
+        'bg-light-bg-secondary hover:bg-light-bg-hover',
+        'text-light-text-primary',
+        'border border-light-border-primary hover:border-light-border-secondary',
         'shadow-light-sm hover:shadow-light-md',
-        'dark:shadow-dark-sm dark:hover:shadow-dark-md'
+        'focus:ring-light-accent-primary focus:ring-offset-light-bg-primary',
       ),
       danger: cn(
-        'bg-status-error-light dark:bg-status-error-dark',
-        'hover:bg-red-600 dark:hover:bg-red-600',
+        // Dark theme
+        'dark:bg-status-error-dark dark:hover:bg-red-600',
+        'dark:shadow-md dark:hover:shadow-lg',
+        'dark:focus:ring-status-error-dark dark:focus:ring-offset-dark-bg-primary',
+        // Light theme
+        'bg-status-error-light hover:bg-red-600',
+        'shadow-light-md hover:shadow-light-lg',
+        'focus:ring-status-error-light focus:ring-offset-light-bg-primary',
+        // Common
         'text-white',
         'hover:scale-105 active:scale-95',
-        'disabled:hover:scale-100'
+        'disabled:hover:scale-100',
       ),
       ghost: cn(
-        'hover:bg-light-bg-hover dark:hover:bg-dark-bg-hover',
-        'text-light-text-secondary dark:text-dark-text-secondary',
-        'hover:text-light-text-primary dark:hover:text-dark-text-primary'
+        // Dark theme
+        'dark:hover:bg-dark-bg-hover',
+        'dark:text-dark-text-secondary dark:hover:text-dark-text-primary',
+        // Light theme
+        'hover:bg-light-bg-hover',
+        'text-light-text-secondary hover:text-light-text-primary',
       ),
       success: cn(
-        'bg-status-success-light dark:bg-status-success-dark',
-        'hover:bg-green-600 dark:hover:bg-green-500',
+        // Dark theme
+        'dark:bg-status-success-dark dark:hover:bg-green-500',
+        'dark:shadow-md dark:hover:shadow-lg',
+        'dark:focus:ring-status-success-dark dark:focus:ring-offset-dark-bg-primary',
+        // Light theme
+        'bg-status-success-light hover:bg-green-600',
+        'shadow-light-md hover:shadow-light-lg',
+        'focus:ring-status-success-light focus:ring-offset-light-bg-primary',
+        // Common
         'text-white',
         'hover:scale-105 active:scale-95',
-        'disabled:hover:scale-100'
+        'disabled:hover:scale-100',
       ),
     };
     

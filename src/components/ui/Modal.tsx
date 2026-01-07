@@ -1,6 +1,8 @@
+// src/components/ui/Modal.tsx
 import { ReactNode, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/utils/cn';
 
 interface ModalProps {
   isOpen: boolean;
@@ -44,7 +46,11 @@ export const Modal = ({ isOpen, onClose, title, children, size = 'md' }: ModalPr
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className={cn(
+              'fixed inset-0 backdrop-blur-sm z-50',
+              'dark:bg-black/60',
+              'bg-black/40'
+            )}
           />
 
           {/* Modal */}
@@ -54,14 +60,42 @@ export const Modal = ({ isOpen, onClose, title, children, size = 'md' }: ModalPr
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2 }}
-              className={`relative w-full ${sizes[size]} bg-gray-900 border border-gray-700 rounded-xl shadow-2xl my-8`}
+              className={cn(
+                `relative w-full ${sizes[size]} rounded-xl shadow-2xl my-8`,
+                // Dark theme
+                'dark:bg-dark-bg-secondary dark:border dark:border-dark-border-primary',
+                'dark:shadow-dark-2xl',
+                // Light theme
+                'bg-light-bg-secondary border border-light-border-primary',
+                'shadow-light-2xl',
+              )}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-800">
-                <h3 className="text-xl font-semibold text-gray-100">{title}</h3>
+              <div className={cn(
+                'flex items-center justify-between p-6',
+                // Dark theme
+                'dark:border-b dark:border-dark-border-primary',
+                // Light theme
+                'border-b border-light-border-primary',
+              )}>
+                <h3 className={cn(
+                  'text-xl font-semibold',
+                  // Dark theme
+                  'dark:text-dark-text-primary',
+                  // Light theme
+                  'text-light-text-primary',
+                )}>
+                  {title}
+                </h3>
                 <button
                   onClick={onClose}
-                  className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all"
+                  className={cn(
+                    'p-2 rounded-lg transition-all',
+                    // Dark theme
+                    'dark:text-dark-text-muted dark:hover:text-white dark:hover:bg-dark-bg-hover',
+                    // Light theme
+                    'text-light-text-muted hover:text-light-text-primary hover:bg-light-bg-hover',
+                  )}
                 >
                   <X className="w-5 h-5" />
                 </button>

@@ -3,48 +3,60 @@
 @tailwind utilities;
 
 @layer base {
-  /* Dark Theme (default) */
+  /* ============================================
+     БАЗОВЫЕ СТИЛИ - Темная тема по умолчанию
+     ============================================ */
+  
   body {
     @apply bg-dark-bg-primary text-dark-text-primary;
     @apply transition-colors duration-300;
+    @apply antialiased;
   }
 
-  /* Light Theme */
+  /* Светлая тема */
   :root:not(.dark) body {
     @apply bg-light-bg-primary text-light-text-primary;
   }
   
-  /* Smooth transitions */
+  /* Плавные переходы для всех элементов */
   * {
     @apply transition-colors duration-200;
+  }
+  
+  /* Улучшенная читаемость */
+  body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
-  /* ========================================
-     GLASS EFFECT - Обновленный для обеих тем
-     ======================================== */
+  /* ============================================
+     GLASS EFFECT - Стеклянный эффект
+     ============================================ */
   
   .glass-effect {
-    @apply bg-dark-bg-secondary/80 backdrop-blur-xl border border-dark-border-primary;
+    @apply backdrop-blur-xl border;
     @apply shadow-dark-lg;
+    @apply bg-dark-bg-secondary/80 border-dark-border-primary;
   }
   
   :root:not(.dark) .glass-effect {
-    @apply bg-light-bg-secondary/95 backdrop-blur-md border border-light-border-primary;
+    @apply bg-light-bg-secondary/95 backdrop-blur-md border-light-border-primary;
     @apply shadow-light-lg;
   }
   
-  /* Glass with glow для dark theme */
+  /* Glass с glow эффектом для темной темы */
   .glass-glow {
     @apply glass-effect;
     @apply dark:shadow-glow-cyan dark:border-dark-border-glow;
   }
   
   
-  /* ========================================
-     CARDS - Красивые карточки
-     ======================================== */
+  /* ============================================
+     CARDS - Профессиональные карточки
+     ============================================ */
   
   .card {
     @apply glass-effect rounded-xl p-6;
@@ -54,7 +66,7 @@
   
   :root:not(.dark) .card {
     @apply hover:shadow-light-xl hover:border-light-border-secondary;
-    @apply bg-gradient-card-light;
+    @apply bg-light-bg-secondary;
   }
   
   .card-elevated {
@@ -62,30 +74,48 @@
     @apply dark:bg-dark-bg-elevated;
   }
   
-  
-  /* ========================================
-     BUTTONS - Улучшенные кнопки
-     ======================================== */
-  
-  .btn-primary {
-    @apply px-4 py-2 bg-cyber-500 hover:bg-cyber-600 text-white rounded-lg;
-    @apply shadow-glow-cyan hover:shadow-glow-cyan;
-    @apply font-medium transition-all duration-200;
-    @apply hover:scale-105 active:scale-95;
+  :root:not(.dark) .card-elevated {
+    @apply shadow-light-xl;
   }
   
+  
+  /* ============================================
+     BUTTONS - Улучшенные кнопки
+     ============================================ */
+  
+  /* Primary Button */
+  .btn-primary {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+    @apply bg-cyber-500 hover:bg-cyber-600 text-white;
+    @apply shadow-glow-cyan hover:shadow-glow-cyan-lg;
+    @apply hover:scale-105 active:scale-95;
+    @apply focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:ring-offset-2;
+  }
+  
+  :root:not(.dark) .btn-primary {
+    @apply shadow-light-md hover:shadow-light-lg;
+    @apply focus:ring-offset-light-bg-primary;
+  }
+  
+  .dark .btn-primary {
+    @apply focus:ring-offset-dark-bg-primary;
+  }
+  
+  /* Secondary Button */
   .btn-secondary {
     @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
     @apply bg-dark-bg-tertiary hover:bg-dark-bg-hover text-dark-text-primary;
     @apply border border-dark-border-primary hover:border-dark-border-secondary;
+    @apply hover:scale-105 active:scale-95;
   }
   
   :root:not(.dark) .btn-secondary {
-    @apply bg-light-bg-tertiary hover:bg-light-bg-hover text-light-text-primary;
+    @apply bg-light-bg-secondary hover:bg-light-bg-hover text-light-text-primary;
     @apply border-light-border-primary hover:border-light-border-secondary;
     @apply shadow-light-sm hover:shadow-light-md;
   }
   
+  /* Ghost Button */
   .btn-ghost {
     @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
     @apply hover:bg-dark-bg-hover text-dark-text-secondary hover:text-dark-text-primary;
@@ -95,39 +125,42 @@
     @apply hover:bg-light-bg-hover text-light-text-secondary hover:text-light-text-primary;
   }
   
+  /* Danger Button */
   .btn-danger {
-    @apply px-4 py-2 bg-status-error-dark hover:bg-red-600 text-white rounded-lg;
-    @apply font-medium transition-all duration-200;
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+    @apply bg-status-error-dark hover:bg-red-600 text-white;
     @apply hover:scale-105 active:scale-95;
+    @apply shadow-md hover:shadow-lg;
   }
   
   :root:not(.dark) .btn-danger {
     @apply bg-status-error-light hover:bg-red-600;
+    @apply shadow-light-md hover:shadow-light-lg;
   }
   
   
-  /* ========================================
-     INPUTS - Красивые поля ввода
-     ======================================== */
+  /* ============================================
+     INPUTS - Улучшенные поля ввода
+     ============================================ */
   
   .input-field {
     @apply w-full px-4 py-2 rounded-lg;
-    @apply bg-dark-bg-tertiary border border-dark-border-primary;
+    @apply bg-dark-bg-input border border-dark-border-input;
     @apply text-dark-text-primary placeholder-dark-text-muted;
     @apply focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent;
     @apply transition-all duration-200;
   }
   
   :root:not(.dark) .input-field {
-    @apply bg-light-bg-secondary border-light-border-primary;
+    @apply bg-light-bg-input border-light-border-input;
     @apply text-light-text-primary placeholder-light-text-muted;
     @apply shadow-light-sm focus:shadow-light-md;
   }
   
   
-  /* ========================================
+  /* ============================================
      BADGES - Статусные бейджи
-     ======================================== */
+     ============================================ */
   
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
@@ -135,49 +168,47 @@
   }
   
   .badge-success {
-    @apply bg-status-success-dark/20 text-status-success-dark;
-    @apply border border-status-success-dark/30;
+    @apply bg-status-success-dark text-white;
+    @apply border border-status-success-dark;
   }
   
   :root:not(.dark) .badge-success {
-    @apply bg-status-success-light/10 text-status-success-light;
-    @apply border-status-success-light/30;
+    @apply bg-status-success-light text-white;
+    @apply border-status-success-light;
   }
   
   .badge-warning {
-    @apply bg-status-warning-dark/20 text-status-warning-dark;
-    @apply border border-status-warning-dark/30;
+    @apply bg-status-warning-dark text-white;
+    @apply border border-status-warning-dark;
   }
   
   :root:not(.dark) .badge-warning {
-    @apply bg-status-warning-light/10 text-status-warning-light;
-    @apply border-status-warning-light/30;
+    @apply bg-status-warning-light text-white;
+    @apply border-status-warning-light;
   }
   
   .badge-error {
-    @apply bg-status-error-dark/20 text-status-error-dark;
-    @apply border border-status-error-dark/30;
+    @apply bg-status-error-dark text-white;
+    @apply border border-status-error-dark;
   }
   
   :root:not(.dark) .badge-error {
-    @apply bg-status-error-light/10 text-status-error-light;
-    @apply border-status-error-light/30;
+    @apply bg-status-error-light text-white;
+    @apply border-status-error-light;
   }
   
   .badge-info {
-    @apply bg-status-info-dark/20 text-status-info-dark;
-    @apply border border-status-info-dark/30;
+    @apply bg-status-info-dark text-white;
+    @apply border border-status-info-dark;
   }
   
   :root:not(.dark) .badge-info {
-    @apply bg-status-info-light/10 text-status-info-light;
-    @apply border-status-info-light/30;
+    @apply bg-status-info-light text-white;
+    @apply border-status-info-light;
   }
-  
-  
-  /* ========================================
+  /* ============================================
      SIDEBAR - Красивая навигация
-     ======================================== */
+     ============================================ */
   
   .sidebar {
     @apply bg-dark-bg-secondary border-r border-dark-border-primary;
@@ -192,51 +223,55 @@
   .sidebar-link {
     @apply flex items-center gap-3 px-4 py-3 rounded-lg;
     @apply text-dark-text-secondary hover:text-dark-text-primary;
-    @apply hover:bg-dark-bg-hover transition-all duration-200;
+    @apply hover:bg-dark-state-hover transition-all duration-200;
   }
   
   :root:not(.dark) .sidebar-link {
     @apply text-light-text-secondary hover:text-light-text-primary;
-    @apply hover:bg-light-bg-hover;
+    @apply hover:bg-light-state-hover;
   }
   
   .sidebar-link-active {
     @apply sidebar-link;
     @apply bg-cyber-500/10 text-cyber-400;
     @apply border border-cyber-500/30;
-    @apply shadow-glow-cyan;
+    @apply shadow-glow-cyan-sm;
   }
   
   :root:not(.dark) .sidebar-link-active {
-    @apply bg-cyber-500/10 text-cyber-600;
-    @apply border-cyber-500/30;
+    @apply bg-light-accent-primary/10 text-light-accent-primary;
+    @apply border-light-accent-primary/30;
     @apply shadow-light-md;
   }
   
   
-  /* ========================================
+  /* ============================================
      MODALS - Красивые модальные окна
-     ======================================== */
+     ============================================ */
   
   .modal-backdrop {
-    @apply fixed inset-0 bg-black/60 backdrop-blur-sm;
-    @apply dark:bg-black/70;
+    @apply fixed inset-0 backdrop-blur-sm;
+    @apply bg-black/60;
+  }
+  
+  :root:not(.dark) .modal-backdrop {
+    @apply bg-black/40;
   }
   
   .modal-content {
     @apply bg-dark-bg-secondary border border-dark-border-primary rounded-xl;
-    @apply shadow-dark-xl;
+    @apply shadow-dark-2xl;
   }
   
   :root:not(.dark) .modal-content {
     @apply bg-light-bg-secondary border-light-border-primary;
-    @apply shadow-light-xl;
+    @apply shadow-light-2xl;
   }
   
   
-  /* ========================================
+  /* ============================================
      SCROLLBAR - Красивый скроллбар
-     ======================================== */
+     ============================================ */
   
   ::-webkit-scrollbar {
     @apply w-2 h-2;
@@ -261,9 +296,9 @@
   }
   
   
-  /* ========================================
-     UTILITY CLASSES
-     ======================================== */
+  /* ============================================
+     UTILITY CLASSES - Вспомогательные классы
+     ============================================ */
   
   .text-gradient {
     @apply bg-gradient-cyber bg-clip-text text-transparent;
@@ -272,24 +307,33 @@
   .border-gradient {
     @apply border-2 border-transparent;
     background-image: linear-gradient(var(--tw-gradient-stops)), 
-                      linear-gradient(135deg, #00c3ff, #8b5cf6);
+                      linear-gradient(135deg, #00c3ff, #a78bfa, #f472b6);
     background-origin: border-box;
     background-clip: padding-box, border-box;
   }
   
   .hover-lift {
     @apply transition-transform duration-300;
-    @apply hover:-translate-y-1 hover:shadow-dark-xl;
+    @apply hover:-translate-y-1;
+  }
+  
+  .dark .hover-lift {
+    @apply hover:shadow-dark-xl;
   }
   
   :root:not(.dark) .hover-lift {
     @apply hover:shadow-light-xl;
   }
   
+  .cyber-glow {
+    @apply shadow-glow-cyan hover:shadow-glow-cyan-lg;
+    @apply transition-shadow duration-300;
+  }
   
-  /* ========================================
-     ANIMATIONS
-     ======================================== */
+  
+  /* ============================================
+     ANIMATIONS - Специальные анимации
+     ============================================ */
   
   @keyframes shimmer {
     0% {
@@ -302,13 +346,25 @@
   
   .shimmer {
     animation: shimmer 2s infinite linear;
+    background-size: 1000px 100%;
+  }
+  
+  .dark .shimmer {
     background: linear-gradient(
       90deg,
       transparent,
       rgba(0, 195, 255, 0.1),
       transparent
     );
-    background-size: 1000px 100%;
+  }
+  
+  :root:not(.dark) .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(14, 165, 233, 0.1),
+      transparent
+    );
   }
   
   .fade-in {
@@ -325,4 +381,75 @@
       transform: translateY(0);
     }
   }
+  
+  
+  /* ============================================
+     СПЕЦИАЛЬНЫЕ ЭФФЕКТЫ
+     ============================================ */
+  
+  /* Градиентный текст для заголовков */
+  .heading-gradient {
+    @apply bg-gradient-cyber bg-clip-text text-transparent;
+    @apply font-bold;
+  }
+  
+  /* Стеклянная панель с подсветкой */
+  .glass-panel {
+    @apply glass-effect p-6 rounded-xl;
+    @apply border-dark-border-glow;
+    @apply hover:shadow-glow-cyan;
+    @apply transition-all duration-300;
+  }
+  
+  :root:not(.dark) .glass-panel {
+    @apply border-light-border-secondary;
+    @apply hover:shadow-light-xl hover:border-light-border-hover;
+  }
+  
+  /* Cyber container для специальных секций */
+  .cyber-container {
+    @apply relative;
+    @apply before:absolute before:inset-0;
+    @apply before:bg-gradient-cyber-subtle;
+    @apply before:rounded-xl before:opacity-50;
+    @apply before:pointer-events-none;
+  }
+  
+  /* Интерактивная карточка */
+  .interactive-card {
+    @apply card cursor-pointer;
+    @apply hover:scale-105 hover:-translate-y-1;
+    @apply active:scale-100 active:translate-y-0;
+    @apply transition-all duration-200;
+  }
+  
+  .dark .interactive-card {
+    @apply hover:shadow-glow-cyan hover:border-dark-accent-primary/50;
+  }
+  
+  :root:not(.dark) .interactive-card {
+    @apply hover:shadow-light-2xl hover:border-light-accent-primary/50;
+  }
 }
+
+/* ============================================
+   КАСТОМНЫЕ CSS ПЕРЕМЕННЫЕ
+   ============================================ */
+:root {
+  --animation-duration: 0.2s;
+  --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   ПЕЧАТЬ
+   ============================================ */
+@media print {
+  body {
+    @apply bg-white text-black;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
+

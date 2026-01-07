@@ -249,4 +249,58 @@ export const tk = {
     api_call: 'API çagyryşy',
     alert: 'Duýduryş',
   },
+
+  // Buttons and actions
+  buttons: {
+    save: 'Ýatda sakla',
+    saveChanges: 'Üýtgeşmeleri ýatda sakla',
+    cancel: 'Ýatyr',
+    delete: 'Öçür',
+    edit: 'Üýtget',
+    close: 'Ýap',
+    create: 'Döret',
+    update: 'Täzele',
+    submit: 'Iber',
+    download: 'Göçür',
+    upload: 'Ýükle',
+    export: 'Eksport',
+    import: 'Import',
+    filter: 'Süzgüç',
+    search: 'Gözleg',
+    viewDetails: 'Jikme-jiklikleri gör',
+    viewAll: 'Ählisini gör',
+    addNew: 'Täze goş',
+    remove: 'Aýyr',
+    confirm: 'Tassykla',
+    back: 'Yza',
+    next: 'Indiki',
+    previous: 'Öňki',
+    finish: 'Tamamla',
+    skip: 'Geç',
+    retry: 'Täzeden synanyş',
+    refresh: 'Täzele',
+  },
+
+  // Modals
+  modals: {
+    confirmDelete: 'Öçürmegi tassykla',
+    confirmAction: 'Hereketi tassykla',
+    areYouSure: 'Siz ynanýarsyňyzmy?',
+    cannotBeUndone: 'Bu hereketi yzyna almak bolmaýar.',
+  },
+
+  // Messages
+  messages: {
+    noData: 'Maglumat ýok',
+    noResults: 'Netije tapylmady',
+    loadingData: 'Maglumatlar ýüklenýär...',
+    savingChanges: 'Üýtgeşmeler ýatda saklanýar...',
+    deletingItem: 'Element öçürilýär...',
+    uploadingFile: 'Faýl ýüklenýär...',
+    processingRequest: 'Haýyş işlenilýär...',
+    operationSuccess: 'Operasiýa üstünlikli tamamlandy',
+    operationFailed: 'Operasiýa şowsuz boldy',
+    pleaseWait: 'Garaşyň...',
+    tryAgain: 'Täzeden synanyşyň',
+  },
 };
