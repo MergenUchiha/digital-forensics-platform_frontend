@@ -229,7 +229,7 @@ In a real system, this would contain the actual evidence data.`;
             <div>
               <p className="text-gray-500 mb-3">Chain of Custody</p>
               <div className="space-y-3">
-                {evidence.chainOfCustody.map((entry, index) => (
+                {evidence.chainOfCustody.map((entry) => (
                   <div 
                     key={entry.id} 
                     className="p-3 bg-gray-900 rounded-lg border border-gray-800"

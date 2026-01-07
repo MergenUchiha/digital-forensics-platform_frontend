@@ -3,12 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { api } from '@/services/api';
-import { User, Lock, Bell } from 'lucide-react';
+import { User, Lock, Bell, Palette } from 'lucide-react';
 
 export const Settings = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications'>('profile');
+  const { theme, setTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
+  
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications' | 'appearance'>('profile');
   const [isSaving, setIsSaving] = useState(false);
 
   const [profileData, setProfileData] = useState({
@@ -29,7 +34,6 @@ export const Settings = () => {
     securityAlerts: true,
   });
 
-  // Загружаем данные при монтировании
   useEffect(() => {
     if (user) {
       setProfileData({
@@ -38,7 +42,6 @@ export const Settings = () => {
       });
     }
 
-    // Загружаем настройки уведомлений из localStorage
     const savedNotifications = localStorage.getItem('notificationSettings');
     if (savedNotifications) {
       setNotificationSettings(JSON.parse(savedNotifications));
@@ -46,38 +49,32 @@ export const Settings = () => {
   }, [user]);
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'security', label: 'Security', icon: Lock },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-  ] as const;
+    { id: 'profile' as const, label: t.settings.profile, icon: User },
+    { id: 'security' as const, label: t.settings.security, icon: Lock },
+    { id: 'notifications' as const, label: t.settings.notifications, icon: Bell },
+    { id: 'appearance' as const, label: t.settings.appearance, icon: Palette },
+  ];
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
 
     try {
-      console.log('Saving profile:', profileData);
-      
-      // Отправляем запрос на backend
-      const response = await api.put('/users/me', {
+      await api.put('/users/me', {
         name: profileData.name,
       });
 
-      console.log('Profile update response:', response.data);
-
       (window as any).showNotification?.({
         type: 'success',
-        title: 'Profile Updated',
-        message: 'Your profile has been successfully updated',
+        title: t.settings.profileUpdated,
+        message: t.settings.profileUpdated,
       });
     } catch (error: any) {
-      console.error('Failed to save profile:', error);
-      
-      const errorMessage = error.response?.data?.message || 'Failed to update profile';
+      const errorMessage = error.response?.data?.message || t.common.error;
       
       (window as any).showNotification?.({
         type: 'error',
-        title: 'Error',
+        title: t.common.error,
         message: errorMessage,
       });
     } finally {
@@ -91,8 +88,8 @@ export const Settings = () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       (window as any).showNotification?.({
         type: 'error',
-        title: 'Error',
-        message: 'Passwords do not match',
+        title: t.common.error,
+        message: t.settings.passwordMismatch,
       });
       return;
     }
@@ -100,8 +97,8 @@ export const Settings = () => {
     if (passwordData.newPassword.length < 6) {
       (window as any).showNotification?.({
         type: 'error',
-        title: 'Error',
-        message: 'Password must be at least 6 characters',
+        title: t.common.error,
+        message: t.settings.passwordTooShort,
       });
       return;
     }
@@ -109,7 +106,7 @@ export const Settings = () => {
     if (!passwordData.currentPassword) {
       (window as any).showNotification?.({
         type: 'error',
-        title: 'Error',
+        title: t.common.error,
         message: 'Please enter your current password',
       });
       return;
@@ -118,15 +115,10 @@ export const Settings = () => {
     setIsSaving(true);
 
     try {
-      console.log('Updating password...');
-      
-      // Отправляем запрос на backend
       await api.put('/users/me/password', {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
-
-      console.log('Password updated successfully');
 
       setPasswordData({
         currentPassword: '',
@@ -136,13 +128,11 @@ export const Settings = () => {
 
       (window as any).showNotification?.({
         type: 'success',
-        title: 'Password Updated',
-        message: 'Your password has been successfully updated',
+        title: t.settings.passwordUpdated,
+        message: t.settings.passwordUpdated,
       });
     } catch (error: any) {
-      console.error('Failed to update password:', error);
-      
-      let errorMessage = 'Failed to update password';
+      let errorMessage = t.common.error;
       
       if (error.response?.status === 401) {
         errorMessage = 'Current password is incorrect';
@@ -152,7 +142,7 @@ export const Settings = () => {
       
       (window as any).showNotification?.({
         type: 'error',
-        title: 'Error',
+        title: t.common.error,
         message: errorMessage,
       });
     } finally {
@@ -165,37 +155,48 @@ export const Settings = () => {
     setIsSaving(true);
 
     try {
-      // Сохраняем в localStorage (в реальном приложении отправляли бы на backend)
       localStorage.setItem('notificationSettings', JSON.stringify(notificationSettings));
-      
-      console.log('Saving notification settings:', notificationSettings);
-      
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
 
       (window as any).showNotification?.({
         type: 'success',
-        title: 'Preferences Saved',
-        message: 'Your notification preferences have been saved',
+        title: t.settings.preferencesSaved,
+        message: t.settings.preferencesSaved,
       });
     } catch (error) {
-      console.error('Failed to save notification settings:', error);
       (window as any).showNotification?.({
         type: 'error',
-        title: 'Error',
-        message: 'Failed to save preferences',
+        title: t.common.error,
+        message: t.common.error,
       });
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handleThemeChange = (newTheme: 'light' | 'dark') => {
+    setTheme(newTheme);
+    (window as any).showNotification?.({
+      type: 'success',
+      title: t.common.success,
+      message: `Theme changed to ${newTheme}`,
+    });
+  };
+
+  const handleLanguageChange = (newLanguage: 'en' | 'ru' | 'tk') => {
+    setLanguage(newLanguage);
+    (window as any).showNotification?.({
+      type: 'success',
+      title: t.common.success,
+      message: `Language changed`,
+    });
+  };
+
   return (
     <div className="space-y-6">
-      {/* Page header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-100">Settings</h1>
-        <p className="text-gray-400 mt-1">Manage your account settings and preferences</p>
+        <h1 className="text-3xl font-bold text-gray-100 dark:text-gray-100">{t.settings.title}</h1>
+        <p className="text-gray-400 dark:text-gray-400 mt-1">{t.settings.subtitle}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -212,7 +213,7 @@ export const Settings = () => {
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                   isActive 
                     ? 'bg-cyber-500/10 text-cyber-400 border border-cyber-500/30' 
-                    : 'text-gray-400 hover:bg-gray-800'
+                    : 'text-gray-400 dark:text-gray-400 hover:bg-gray-800 dark:hover:bg-gray-800 hover:text-gray-200'
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -227,39 +228,39 @@ export const Settings = () => {
           {activeTab === 'profile' && (
             <Card>
               <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
+                <CardTitle>{t.settings.profileInfo}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSaveProfile} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Full Name
+                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                      {t.settings.fullName}
                     </label>
                     <Input
                       type="text"
                       value={profileData.name}
                       onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                      placeholder="Enter your name"
+                      placeholder={t.settings.fullName}
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Email Address
+                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                      {t.auth.email}
                     </label>
                     <Input
                       type="email"
                       value={profileData.email}
-                      placeholder="Enter your email"
+                      placeholder={t.auth.email}
                       disabled
                     />
-                    <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                    <p className="text-xs text-gray-500 mt-1">{t.settings.emailCannotChange}</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Role
+                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                      {t.settings.role}
                     </label>
                     <Input
                       type="text"
@@ -270,7 +271,7 @@ export const Settings = () => {
 
                   <div className="pt-4">
                     <Button type="submit" variant="primary" disabled={isSaving}>
-                      {isSaving ? 'Saving...' : 'Save Changes'}
+                      {isSaving ? `${t.common.loading}` : t.settings.saveChanges}
                     </Button>
                   </div>
                 </form>
@@ -281,58 +282,58 @@ export const Settings = () => {
           {activeTab === 'security' && (
             <Card>
               <CardHeader>
-                <CardTitle>Security Settings</CardTitle>
+                <CardTitle>{t.settings.securitySettings}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleUpdatePassword} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Current Password *
+                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                      {t.settings.currentPassword} *
                     </label>
                     <Input
                       type="password"
                       value={passwordData.currentPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                      placeholder="Enter current password"
+                      placeholder={t.settings.currentPassword}
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      New Password *
+                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                      {t.settings.newPassword} *
                     </label>
                     <Input
                       type="password"
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                      placeholder="Enter new password (min 6 characters)"
+                      placeholder={t.settings.newPassword}
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Confirm New Password *
+                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                      {t.settings.confirmNewPassword} *
                     </label>
                     <Input
                       type="password"
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                      placeholder="Confirm new password"
+                      placeholder={t.settings.confirmNewPassword}
                       required
                     />
                   </div>
 
                   <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                     <p className="text-sm text-blue-400">
-                      ℹ️ Your password must be at least 6 characters long. Make sure to remember it!
+                      ℹ️ {t.settings.passwordTooShort}
                     </p>
                   </div>
 
                   <div className="pt-4">
                     <Button type="submit" variant="primary" disabled={isSaving}>
-                      {isSaving ? 'Updating...' : 'Update Password'}
+                      {isSaving ? `${t.common.loading}` : t.settings.updatePassword}
                     </Button>
                   </div>
                 </form>
@@ -343,14 +344,14 @@ export const Settings = () => {
           {activeTab === 'notifications' && (
             <Card>
               <CardHeader>
-                <CardTitle>Notification Preferences</CardTitle>
+                <CardTitle>{t.settings.notificationPreferences}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSaveNotifications} className="space-y-4">
-                  <div className="flex items-center justify-between py-3 border-b border-gray-800">
+                  <div className="flex items-center justify-between py-3 border-b border-gray-800 dark:border-gray-800">
                     <div>
-                      <p className="font-medium text-gray-200">Email Notifications</p>
-                      <p className="text-sm text-gray-400">Receive email updates about cases</p>
+                      <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.emailNotifications}</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-400">{t.settings.emailNotificationsDesc}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -363,10 +364,10 @@ export const Settings = () => {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-gray-800">
+                  <div className="flex items-center justify-between py-3 border-b border-gray-800 dark:border-gray-800">
                     <div>
-                      <p className="font-medium text-gray-200">Case Updates</p>
-                      <p className="text-sm text-gray-400">Get notified when cases are updated</p>
+                      <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.caseUpdates}</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-400">{t.settings.caseUpdatesDesc}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -379,10 +380,10 @@ export const Settings = () => {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-gray-800">
+                  <div className="flex items-center justify-between py-3 border-b border-gray-800 dark:border-gray-800">
                     <div>
-                      <p className="font-medium text-gray-200">Evidence Uploads</p>
-                      <p className="text-sm text-gray-400">Notifications for new evidence</p>
+                      <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.evidenceUploads}</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-400">{t.settings.evidenceUploadsDesc}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -397,8 +398,8 @@ export const Settings = () => {
 
                   <div className="flex items-center justify-between py-3">
                     <div>
-                      <p className="font-medium text-gray-200">Security Alerts</p>
-                      <p className="text-sm text-gray-400">Critical security notifications</p>
+                      <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.securityAlerts}</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-400">{t.settings.securityAlertsDesc}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -413,10 +414,120 @@ export const Settings = () => {
 
                   <div className="pt-4">
                     <Button type="submit" variant="primary" disabled={isSaving}>
-                      {isSaving ? 'Saving...' : 'Save Preferences'}
+                      {isSaving ? `${t.common.loading}` : t.common.save}
                     </Button>
                   </div>
                 </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 'appearance' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t.settings.appearanceSettings}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Theme Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                    {t.settings.theme}
+                  </label>
+                  <p className="text-sm text-gray-400 dark:text-gray-400 mb-3">{t.settings.themeDesc}</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => handleThemeChange('light')}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        theme === 'light'
+                          ? 'border-cyber-500 bg-cyber-500/10'
+                          : 'border-gray-700 dark:border-gray-700 hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-full h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded" />
+                        <span className="text-sm font-medium text-gray-200 dark:text-gray-200">
+                          {t.settings.lightTheme}
+                        </span>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handleThemeChange('dark')}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        theme === 'dark'
+                          ? 'border-cyber-500 bg-cyber-500/10'
+                          : 'border-gray-700 dark:border-gray-700 hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-full h-20 bg-gradient-to-br from-gray-900 to-gray-950 rounded" />
+                        <span className="text-sm font-medium text-gray-200 dark:text-gray-200">
+                          {t.settings.darkTheme}
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Language Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                    {t.settings.language}
+                  </label>
+                  <p className="text-sm text-gray-400 dark:text-gray-400 mb-3">{t.settings.languageDesc}</p>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => handleLanguageChange('en')}
+                      className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                        language === 'en'
+                          ? 'border-cyber-500 bg-cyber-500/10'
+                          : 'border-gray-700 dark:border-gray-700 hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">🇬🇧</span>
+                        <div>
+                          <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.english}</p>
+                          <p className="text-sm text-gray-400 dark:text-gray-400">English</p>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handleLanguageChange('ru')}
+                      className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                        language === 'ru'
+                          ? 'border-cyber-500 bg-cyber-500/10'
+                          : 'border-gray-700 dark:border-gray-700 hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">🇷🇺</span>
+                        <div>
+                          <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.russian}</p>
+                          <p className="text-sm text-gray-400 dark:text-gray-400">Русский</p>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handleLanguageChange('tk')}
+                      className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                        language === 'tk'
+                          ? 'border-cyber-500 bg-cyber-500/10'
+                          : 'border-gray-700 dark:border-gray-700 hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">🇹🇲</span>
+                        <div>
+                          <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.turkmen}</p>
+                          <p className="text-sm text-gray-400 dark:text-gray-400">Türkmençe</p>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
