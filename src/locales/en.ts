@@ -249,4 +249,58 @@ export const en = {
     api_call: 'API Call',
     alert: 'Alert',
   },
+
+  // Buttons and actions
+  buttons: {
+    save: 'Save',
+    saveChanges: 'Save Changes',
+    cancel: 'Cancel',
+    delete: 'Delete',
+    edit: 'Edit',
+    close: 'Close',
+    create: 'Create',
+    update: 'Update',
+    submit: 'Submit',
+    download: 'Download',
+    upload: 'Upload',
+    export: 'Export',
+    import: 'Import',
+    filter: 'Filter',
+    search: 'Search',
+    viewDetails: 'View Details',
+    viewAll: 'View All',
+    addNew: 'Add New',
+    remove: 'Remove',
+    confirm: 'Confirm',
+    back: 'Back',
+    next: 'Next',
+    previous: 'Previous',
+    finish: 'Finish',
+    skip: 'Skip',
+    retry: 'Retry',
+    refresh: 'Refresh',
+  },
+
+  // Modals
+  modals: {
+    confirmDelete: 'Confirm Deletion',
+    confirmAction: 'Confirm Action',
+    areYouSure: 'Are you sure?',
+    cannotBeUndone: 'This action cannot be undone.',
+  },
+
+  // Messages
+  messages: {
+    noData: 'No data available',
+    noResults: 'No results found',
+    loadingData: 'Loading data...',
+    savingChanges: 'Saving changes...',
+    deletingItem: 'Deleting item...',
+    uploadingFile: 'Uploading file...',
+    processingRequest: 'Processing request...',
+    operationSuccess: 'Operation completed successfully',
+    operationFailed: 'Operation failed',
+    pleaseWait: 'Please wait...',
+    tryAgain: 'Please try again',
+  },
 };

@@ -13,7 +13,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       <div className="w-full">
         <div className="relative">
           {icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-light-text-muted dark:text-dark-text-muted">
+            <div className={cn(
+              'absolute left-3 top-1/2 -translate-y-1/2',
+              'dark:text-dark-text-muted',
+              'text-light-text-muted'
+            )}>
               {icon}
             </div>
           )}
@@ -24,27 +28,39 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               'w-full px-4 py-2 rounded-lg',
               'transition-all duration-200',
               
-              // Фон
-              'bg-light-bg-secondary dark:bg-dark-bg-tertiary',
+              // Dark theme
+              'dark:bg-dark-bg-input',
+              'dark:text-dark-text-primary',
+              'dark:placeholder-dark-text-muted',
               
-              // Текст
-              'text-light-text-primary dark:text-dark-text-primary',
-              'placeholder-light-text-muted dark:placeholder-dark-text-muted',
+              // Light theme
+              'bg-light-bg-input',
+              'text-light-text-primary',
+              'placeholder-light-text-muted',
               
               // Границы
               error 
-                ? 'border-2 border-status-error-light dark:border-status-error-dark' 
-                : 'border border-light-border-primary dark:border-dark-border-primary',
+                ? cn(
+                    'border-2',
+                    'dark:border-status-error-dark',
+                    'border-status-error-light'
+                  )
+                : cn(
+                    'border',
+                    'dark:border-dark-border-input',
+                    'border-light-border-input'
+                  ),
               
               // Focus состояние
               'focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent',
               
               // Тени
-              'shadow-light-sm focus:shadow-light-md',
               'dark:shadow-dark-sm dark:focus:shadow-dark-md',
+              'shadow-light-sm focus:shadow-light-md',
               
               // Hover
-              'hover:border-light-border-secondary dark:hover:border-dark-border-secondary',
+              'dark:hover:border-dark-border-secondary',
+              'hover:border-light-border-secondary',
               
               // Если есть иконка, добавить padding слева
               icon && 'pl-10',
@@ -55,7 +71,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           />
         </div>
         {error && (
-          <p className="mt-1.5 text-sm text-status-error-light dark:text-status-error-dark flex items-center gap-1">
+          <p className={cn(
+            'mt-1.5 text-sm flex items-center gap-1',
+            'dark:text-status-error-dark',
+            'text-status-error-light'
+          )}>
             <svg 
               className="w-4 h-4" 
               fill="currentColor" 
@@ -94,34 +114,50 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             'transition-all duration-200',
             'resize-none',
             
-            // Фон
-            'bg-light-bg-secondary dark:bg-dark-bg-tertiary',
+            // Dark theme
+            'dark:bg-dark-bg-input',
+            'dark:text-dark-text-primary',
+            'dark:placeholder-dark-text-muted',
             
-            // Текст
-            'text-light-text-primary dark:text-dark-text-primary',
-            'placeholder-light-text-muted dark:placeholder-dark-text-muted',
+            // Light theme
+            'bg-light-bg-input',
+            'text-light-text-primary',
+            'placeholder-light-text-muted',
             
             // Границы
             error 
-              ? 'border-2 border-status-error-light dark:border-status-error-dark' 
-              : 'border border-light-border-primary dark:border-dark-border-primary',
+              ? cn(
+                  'border-2',
+                  'dark:border-status-error-dark',
+                  'border-status-error-light'
+                )
+              : cn(
+                  'border',
+                  'dark:border-dark-border-input',
+                  'border-light-border-input'
+                ),
             
             // Focus состояние
             'focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent',
             
             // Тени
-            'shadow-light-sm focus:shadow-light-md',
             'dark:shadow-dark-sm dark:focus:shadow-dark-md',
+            'shadow-light-sm focus:shadow-light-md',
             
             // Hover
-            'hover:border-light-border-secondary dark:hover:border-dark-border-secondary',
+            'dark:hover:border-dark-border-secondary',
+            'hover:border-light-border-secondary',
             
             className
           )}
           {...props}
         />
         {error && (
-          <p className="mt-1.5 text-sm text-status-error-light dark:text-status-error-dark flex items-center gap-1">
+          <p className={cn(
+            'mt-1.5 text-sm flex items-center gap-1',
+            'dark:text-status-error-dark',
+            'text-status-error-light'
+          )}>
             <svg 
               className="w-4 h-4" 
               fill="currentColor" 
