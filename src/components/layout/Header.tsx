@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatRelativeTime } from '@/utils/format';
 import { api } from '@/services/api';
+import { cn } from '@/utils/cn';
 
 interface Notification {
   id: string;
@@ -27,7 +28,6 @@ export const Header = () => {
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   const navigate = useNavigate();
 
-  // Загружаем уведомления при монтировании и при открытии dropdown
   useEffect(() => {
     if (isNotificationsOpen) {
       fetchNotifications();
@@ -37,13 +37,9 @@ export const Header = () => {
   const fetchNotifications = async () => {
     try {
       setIsLoadingNotifications(true);
-      console.log('Fetching notifications...');
       const { data } = await api.get('/notifications');
-      console.log('Notifications received:', data);
       setNotifications(data);
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
-      // Если API еще не готово, показываем mock данные
       setNotifications([
         {
           id: '1',
@@ -71,9 +67,7 @@ export const Header = () => {
         message: `Case "${data.title}" has been successfully created`,
       });
       
-      // Обновляем уведомления
       fetchNotifications();
-      
       navigate(`/cases/${newCase.id}`);
     } catch (error: any) {
       console.error('Failed to create case:', error);
@@ -105,8 +99,6 @@ export const Header = () => {
         prev.map(n => n.id === id ? { ...n, read: true } : n)
       );
     } catch (error) {
-      console.error('Failed to mark notification as read:', error);
-      // Fallback to local update
       setNotifications(prev => 
         prev.map(n => n.id === id ? { ...n, read: true } : n)
       );
@@ -120,8 +112,6 @@ export const Header = () => {
         prev.map(n => ({ ...n, read: true }))
       );
     } catch (error) {
-      console.error('Failed to mark all as read:', error);
-      // Fallback to local update
       setNotifications(prev => 
         prev.map(n => ({ ...n, read: true }))
       );
@@ -133,8 +123,6 @@ export const Header = () => {
       await api.delete(`/notifications/${id}`);
       setNotifications(prev => prev.filter(n => n.id !== id));
     } catch (error) {
-      console.error('Failed to delete notification:', error);
-      // Fallback to local update
       setNotifications(prev => prev.filter(n => n.id !== id));
     }
   };
@@ -150,7 +138,7 @@ export const Header = () => {
 
   return (
     <>
-      <header className="h-16 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-6">
+      <header className="h-16 bg-bg-secondary border-b border-border-primary flex items-center justify-between px-6 shadow-light-md dark:shadow-dark-md">
         {/* Search */}
         <div className="flex-1 max-w-xl">
           <SearchBar placeholder="Search cases, evidence, events..." />
@@ -182,26 +170,27 @@ export const Header = () => {
             <AnimatePresence>
               {isNotificationsOpen && (
                 <>
-                  {/* Backdrop */}
                   <div 
                     className="fixed inset-0 z-40" 
                     onClick={() => setIsNotificationsOpen(false)}
                   />
                   
-                  {/* Dropdown */}
                   <motion.div
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-full mt-2 w-96 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl z-50 overflow-hidden"
+                    className={cn(
+                      'absolute right-0 top-full mt-2 w-96 rounded-lg shadow-2xl z-50 overflow-hidden',
+                      'bg-bg-secondary border border-border-primary',
+                    )}
                   >
                     {/* Header */}
-                    <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+                    <div className="p-4 border-b border-border-primary flex items-center justify-between">
                       <div>
-                        <h3 className="text-sm font-semibold text-gray-100">Notifications</h3>
+                        <h3 className="text-sm font-semibold text-text-primary">Notifications</h3>
                         {unreadCount > 0 && (
-                          <p className="text-xs text-gray-400 mt-0.5">
+                          <p className="text-xs text-text-tertiary mt-0.5">
                             {unreadCount} unread
                           </p>
                         )}
@@ -221,7 +210,7 @@ export const Header = () => {
                       {isLoadingNotifications ? (
                         <div className="p-8 text-center">
                           <div className="w-8 h-8 border-2 border-cyber-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                          <p className="text-sm text-gray-400">Loading...</p>
+                          <p className="text-sm text-text-tertiary">Loading...</p>
                         </div>
                       ) : notifications.length > 0 ? (
                         <div>
@@ -231,9 +220,11 @@ export const Header = () => {
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               exit={{ opacity: 0, x: 20 }}
-                              className={`p-4 border-b border-gray-800 hover:bg-gray-800/50 transition-colors cursor-pointer ${
-                                !notification.read ? 'bg-cyan-500/5' : ''
-                              }`}
+                              className={cn(
+                                'p-4 border-b border-border-primary cursor-pointer transition-colors',
+                                'hover:bg-bg-hover',
+                                !notification.read && 'bg-cyan-500/5'
+                              )}
                               onClick={() => handleMarkAsRead(notification.id)}
                             >
                               <div className="flex items-start gap-3">
@@ -242,7 +233,7 @@ export const Header = () => {
                                 </span>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-start justify-between gap-2">
-                                    <p className="text-sm font-medium text-gray-100">
+                                    <p className="text-sm font-medium text-text-primary">
                                       {notification.title}
                                     </p>
                                     <button
@@ -250,15 +241,15 @@ export const Header = () => {
                                         e.stopPropagation();
                                         handleDeleteNotification(notification.id);
                                       }}
-                                      className="text-gray-500 hover:text-gray-300 transition-colors"
+                                      className="text-text-muted hover:text-text-primary transition-colors"
                                     >
                                       <X className="w-4 h-4" />
                                     </button>
                                   </div>
-                                  <p className="text-xs text-gray-400 mt-1 line-clamp-2">
+                                  <p className="text-xs text-text-secondary mt-1 line-clamp-2">
                                     {notification.message}
                                   </p>
-                                  <p className="text-xs text-gray-500 mt-2">
+                                  <p className="text-xs text-text-tertiary mt-2">
                                     {formatRelativeTime(notification.createdAt)}
                                   </p>
                                 </div>
@@ -271,20 +262,17 @@ export const Header = () => {
                         </div>
                       ) : (
                         <div className="p-8 text-center">
-                          <Bell className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                          <p className="text-sm text-gray-400">No notifications</p>
+                          <Bell className="w-12 h-12 text-text-muted mx-auto mb-3" />
+                          <p className="text-sm text-text-tertiary">No notifications</p>
                         </div>
                       )}
                     </div>
 
                     {/* Footer */}
                     {notifications.length > 0 && (
-                      <div className="p-3 border-t border-gray-800 text-center">
+                      <div className="p-3 border-t border-border-primary text-center">
                         <button 
-                          onClick={() => {
-                            setIsNotificationsOpen(false);
-                            // В будущем можно добавить страницу со всеми уведомлениями
-                          }}
+                          onClick={() => setIsNotificationsOpen(false)}
                           className="text-xs text-cyber-400 hover:text-cyber-300 transition-colors"
                         >
                           View all notifications

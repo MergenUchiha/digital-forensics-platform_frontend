@@ -1,4 +1,3 @@
-// src/components/ui/Button.tsx
 import { ButtonHTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/utils/cn';
 
@@ -22,69 +21,39 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       'inline-flex items-center justify-center rounded-lg font-medium',
       'transition-all duration-200',
       'disabled:opacity-50 disabled:cursor-not-allowed',
-      'focus:outline-none focus:ring-2 focus:ring-offset-2',
+      'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyber-500',
     );
     
     const variants = {
       primary: cn(
-        // Dark theme
         'bg-cyber-500 hover:bg-cyber-600 text-white',
-        'dark:shadow-glow-cyan dark:hover:shadow-glow-cyan-lg',
-        'dark:focus:ring-cyber-500 dark:focus:ring-offset-dark-bg-primary',
-        // Light theme
         'shadow-light-md hover:shadow-light-lg',
-        'focus:ring-cyber-500 focus:ring-offset-light-bg-primary',
-        // Common
+        'dark:shadow-glow-cyan-sm dark:hover:shadow-glow-cyan',
         'hover:scale-105 active:scale-95',
         'disabled:hover:scale-100',
       ),
       secondary: cn(
-        // Dark theme
-        'dark:bg-dark-bg-tertiary dark:hover:bg-dark-bg-hover',
-        'dark:text-dark-text-primary',
-        'dark:border dark:border-dark-border-primary dark:hover:border-dark-border-secondary',
-        'dark:shadow-dark-sm dark:hover:shadow-dark-md',
-        'dark:focus:ring-dark-accent-primary dark:focus:ring-offset-dark-bg-primary',
-        // Light theme
-        'bg-light-bg-secondary hover:bg-light-bg-hover',
-        'text-light-text-primary',
-        'border border-light-border-primary hover:border-light-border-secondary',
-        'shadow-light-sm hover:shadow-light-md',
-        'focus:ring-light-accent-primary focus:ring-offset-light-bg-primary',
+        // Универсальные цвета - автоматически меняются по теме
+        'bg-bg-tertiary hover:bg-bg-hover',
+        'text-text-primary',
+        'border border-border-primary hover:border-border-secondary',
+        'shadow-light-sm hover:shadow-light-md dark:shadow-dark-sm dark:hover:shadow-dark-md',
       ),
       danger: cn(
-        // Dark theme
-        'dark:bg-status-error-dark dark:hover:bg-red-600',
-        'dark:shadow-md dark:hover:shadow-lg',
-        'dark:focus:ring-status-error-dark dark:focus:ring-offset-dark-bg-primary',
-        // Light theme
-        'bg-status-error-light hover:bg-red-600',
-        'shadow-light-md hover:shadow-light-lg',
-        'focus:ring-status-error-light focus:ring-offset-light-bg-primary',
-        // Common
+        'bg-status-error hover:bg-red-600',
         'text-white',
+        'shadow-light-md hover:shadow-light-lg dark:shadow-dark-md dark:hover:shadow-dark-lg',
         'hover:scale-105 active:scale-95',
         'disabled:hover:scale-100',
       ),
       ghost: cn(
-        // Dark theme
-        'dark:hover:bg-dark-bg-hover',
-        'dark:text-dark-text-secondary dark:hover:text-dark-text-primary',
-        // Light theme
-        'hover:bg-light-bg-hover',
-        'text-light-text-secondary hover:text-light-text-primary',
+        'hover:bg-bg-hover',
+        'text-text-secondary hover:text-text-primary',
       ),
       success: cn(
-        // Dark theme
-        'dark:bg-status-success-dark dark:hover:bg-green-500',
-        'dark:shadow-md dark:hover:shadow-lg',
-        'dark:focus:ring-status-success-dark dark:focus:ring-offset-dark-bg-primary',
-        // Light theme
-        'bg-status-success-light hover:bg-green-600',
-        'shadow-light-md hover:shadow-light-lg',
-        'focus:ring-status-success-light focus:ring-offset-light-bg-primary',
-        // Common
+        'bg-status-success hover:bg-green-600',
         'text-white',
+        'shadow-light-md hover:shadow-light-lg dark:shadow-dark-md dark:hover:shadow-dark-lg',
         'hover:scale-105 active:scale-95',
         'disabled:hover:scale-100',
       ),

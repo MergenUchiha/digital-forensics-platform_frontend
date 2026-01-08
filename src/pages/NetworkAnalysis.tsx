@@ -11,8 +11,8 @@ export const NetworkAnalysis = () => {
     <div className="space-y-6">
       {/* Page header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-100">Network Analysis</h1>
-        <p className="text-gray-400 mt-1">Visualize network topology and connections</p>
+        <h1 className="text-3xl font-bold text-text-primary">Network Analysis</h1>
+        <p className="text-text-secondary mt-1">Visualize network topology and connections</p>
       </div>
 
       {/* Network Graph */}
@@ -33,23 +33,23 @@ export const NetworkAnalysis = () => {
           <CardContent>
             <div className="space-y-4">
               {suspiciousNodes.map((node) => (
-                <div key={node.id} className="p-4 bg-gray-900 rounded-lg border border-red-500/20">
+                <div key={node.id} className="p-4 bg-bg-tertiary rounded-lg border border-red-500/20">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <h4 className="font-semibold text-gray-100">{node.label}</h4>
-                      <p className="text-sm text-gray-400">{node.type}</p>
+                      <h4 className="font-semibold text-text-primary">{node.label}</h4>
+                      <p className="text-sm text-text-secondary">{node.type}</p>
                     </div>
                     <Badge variant="danger">SUSPICIOUS</Badge>
                   </div>
                   <div className="space-y-1 text-sm">
                     {node.metadata.country && (
-                      <p className="text-gray-400">Country: {node.metadata.country}</p>
+                      <p className="text-text-secondary">Country: {node.metadata.country}</p>
                     )}
                     {node.metadata.reputation !== undefined && (
-                      <p className="text-gray-400">Reputation: {node.metadata.reputation}/100</p>
+                      <p className="text-text-secondary">Reputation: {node.metadata.reputation}/100</p>
                     )}
                     {node.metadata.firstSeen && (
-                      <p className="text-gray-400">First Seen: {new Date(node.metadata.firstSeen).toLocaleString()}</p>
+                      <p className="text-text-secondary">First Seen: {new Date(node.metadata.firstSeen).toLocaleString()}</p>
                     )}
                   </div>
                 </div>
@@ -65,22 +65,22 @@ export const NetworkAnalysis = () => {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Total Connections</span>
-                <span className="text-2xl font-bold text-gray-100">{mockNetworkConnections.length}</span>
+                <span className="text-text-secondary">Total Connections</span>
+                <span className="text-2xl font-bold text-text-primary">{mockNetworkConnections.length}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Suspicious Connections</span>
-                <span className="text-2xl font-bold text-red-400">
+                <span className="text-text-secondary">Suspicious Connections</span>
+                <span className="text-2xl font-bold text-red-500">
                   {mockNetworkConnections.filter(c => c.suspicious).length}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Total Data Transfer</span>
-                <span className="text-2xl font-bold text-gray-100">1.4 GB</span>
+                <span className="text-text-secondary">Total Data Transfer</span>
+                <span className="text-2xl font-bold text-text-primary">1.4 GB</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Unique IPs</span>
-                <span className="text-2xl font-bold text-gray-100">{mockNetworkNodes.filter(n => n.type === 'ip').length}</span>
+                <span className="text-text-secondary">Unique IPs</span>
+                <span className="text-2xl font-bold text-text-primary">{mockNetworkNodes.filter(n => n.type === 'ip').length}</span>
               </div>
             </div>
           </CardContent>

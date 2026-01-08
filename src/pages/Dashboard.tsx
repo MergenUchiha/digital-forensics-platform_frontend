@@ -45,7 +45,7 @@ export const Dashboard = () => {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-cyber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400 dark:text-gray-400">{t.common.loading}</p>
+          <p className="text-text-secondary">{t.common.loading}</p>
         </div>
       </div>
     );
@@ -54,7 +54,7 @@ export const Dashboard = () => {
   if (!dashboardStats) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-400 dark:text-gray-400">No data available</p>
+        <p className="text-text-secondary">No data available</p>
       </div>
     );
   }
@@ -63,8 +63,8 @@ export const Dashboard = () => {
     <div className="space-y-6">
       {/* Page header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-100 dark:text-gray-100">{t.dashboard.title}</h1>
-        <p className="text-gray-400 dark:text-gray-400 mt-1">{t.dashboard.subtitle}</p>
+        <h1 className="text-3xl font-bold text-text-primary">{t.dashboard.title}</h1>
+        <p className="text-text-secondary mt-1">{t.dashboard.subtitle}</p>
       </div>
 
       {/* Stats Grid */}

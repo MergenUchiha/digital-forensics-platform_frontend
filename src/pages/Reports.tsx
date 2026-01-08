@@ -10,6 +10,7 @@ import { evidenceService } from '@/services/evidence.service';
 import { timelineService } from '@/services/timeline.service';
 import { exportCaseToPDF } from '@/utils/pdfExport';
 import { Case } from '@/types';
+import { cn } from '@/utils/cn';
 
 interface Report {
   id: string;
@@ -39,7 +40,6 @@ export const Reports = () => {
       const casesData = await casesService.getAll();
       setCases(casesData);
       
-      // Load saved reports from localStorage
       const savedReports = localStorage.getItem('forensics_reports');
       if (savedReports) {
         setReports(JSON.parse(savedReports));
@@ -64,17 +64,14 @@ export const Reports = () => {
     setIsGenerating(true);
     
     try {
-      // Fetch case data
       const [caseData, evidence, events] = await Promise.all([
         casesService.getById(selectedCaseId),
         evidenceService.getAll(selectedCaseId),
         timelineService.getAll(selectedCaseId),
       ]);
 
-      // Generate PDF
       exportCaseToPDF(caseData, evidence, events);
 
-      // Create report record
       const newReport: Report = {
         id: `report-${Date.now()}`,
         title: `${caseData.title} - Investigation Report`,
@@ -87,8 +84,6 @@ export const Reports = () => {
 
       const updatedReports = [...reports, newReport];
       setReports(updatedReports);
-      
-      // Save to localStorage
       localStorage.setItem('forensics_reports', JSON.stringify(updatedReports));
 
       setIsGenerateModalOpen(false);
@@ -146,8 +141,8 @@ export const Reports = () => {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-100">Reports</h1>
-          <p className="text-gray-400 mt-1">Generate and manage investigation reports</p>
+          <h1 className="text-3xl font-bold text-text-primary">Reports</h1>
+          <p className="text-text-secondary mt-1">Generate and manage investigation reports</p>
         </div>
         <Button className="gap-2" onClick={() => setIsGenerateModalOpen(true)}>
           <Plus className="w-4 h-4" />
@@ -163,16 +158,16 @@ export const Reports = () => {
               <CardContent className="flex items-center justify-between">
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-blue-500/10 rounded-lg">
-                    <FileText className="w-6 h-6 text-blue-400" />
+                    <FileText className="w-6 h-6 text-blue-500" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-100 mb-1">
+                    <h3 className="text-lg font-semibold text-text-primary mb-1">
                       {report.title}
                     </h3>
-                    <p className="text-sm text-gray-400 mb-2">
+                    <p className="text-sm text-text-secondary mb-2">
                       Case: {report.caseName}
                     </p>
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <div className="flex items-center gap-4 text-xs text-text-muted">
                       <span>Generated {formatDate(report.generatedAt)}</span>
                       <Badge variant="info">{report.format}</Badge>
                       <span>{report.size}</span>
@@ -203,8 +198,8 @@ export const Reports = () => {
         ) : (
           <Card>
             <CardContent className="py-12 text-center">
-              <FileText className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400 mb-4">No reports generated yet</p>
+              <FileText className="w-16 h-16 text-text-muted mx-auto mb-4" />
+              <p className="text-text-secondary mb-4">No reports generated yet</p>
               <Button onClick={() => setIsGenerateModalOpen(true)}>
                 Generate Your First Report
               </Button>
@@ -216,17 +211,21 @@ export const Reports = () => {
       {/* Report Templates */}
       <Card>
         <CardContent>
-          <h3 className="text-lg font-semibold text-gray-100 mb-4">Report Templates</h3>
+          <h3 className="text-lg font-semibold text-text-primary mb-4">Report Templates</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {['Executive Summary', 'Technical Analysis', 'Legal Compliance'].map((template) => (
               <div
                 key={template}
-                className="p-4 bg-gray-900 rounded-lg border border-gray-800 hover:border-cyber-500/50 cursor-pointer transition-all"
+                className={cn(
+                  "p-4 rounded-lg border cursor-pointer transition-all",
+                  "bg-bg-tertiary border-border-primary",
+                  "hover:border-cyber-500/50 hover:bg-bg-hover"
+                )}
                 onClick={() => setIsGenerateModalOpen(true)}
               >
-                <FileText className="w-8 h-8 text-cyber-400 mb-2" />
-                <h4 className="font-medium text-gray-100">{template}</h4>
-                <p className="text-sm text-gray-400 mt-1">
+                <FileText className="w-8 h-8 text-cyber-500 mb-2" />
+                <h4 className="font-medium text-text-primary">{template}</h4>
+                <p className="text-sm text-text-secondary mt-1">
                   Standard template for {template.toLowerCase()}
                 </p>
               </div>
@@ -244,13 +243,13 @@ export const Reports = () => {
       >
         <form onSubmit={handleGenerateReport} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               Select Case *
             </label>
             <select
               value={selectedCaseId}
               onChange={(e) => setSelectedCaseId(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+              className="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500"
               required
             >
               <option value="">Select a case...</option>
@@ -261,18 +260,18 @@ export const Reports = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               Report Format
             </label>
             <select
-              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+              className="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500"
             >
               <option value="pdf">PDF Document</option>
             </select>
           </div>
 
-          <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-            <p className="text-sm text-blue-400">
+          <div className="p-4 bg-status-info/10 border border-status-info/30 rounded-lg">
+            <p className="text-sm text-status-info">
               The report will include case details, evidence list, timeline events, and analysis summary.
             </p>
           </div>
@@ -309,33 +308,33 @@ export const Reports = () => {
         {selectedReport && (
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-100">{selectedReport.title}</h3>
-              <p className="text-sm text-gray-400 mt-1">Case: {selectedReport.caseName}</p>
+              <h3 className="text-lg font-semibold text-text-primary">{selectedReport.title}</h3>
+              <p className="text-sm text-text-secondary mt-1">Case: {selectedReport.caseName}</p>
             </div>
 
-            <div className="p-4 bg-gray-900 border border-gray-800 rounded-lg">
+            <div className="p-4 bg-bg-tertiary border border-border-primary rounded-lg">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-500">Generated</p>
-                  <p className="text-gray-200">{formatDate(selectedReport.generatedAt)}</p>
+                  <p className="text-text-muted">Generated</p>
+                  <p className="text-text-primary">{formatDate(selectedReport.generatedAt)}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Format</p>
-                  <p className="text-gray-200">{selectedReport.format}</p>
+                  <p className="text-text-muted">Format</p>
+                  <p className="text-text-primary">{selectedReport.format}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Size</p>
-                  <p className="text-gray-200">{selectedReport.size}</p>
+                  <p className="text-text-muted">Size</p>
+                  <p className="text-text-primary">{selectedReport.size}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Status</p>
+                  <p className="text-text-muted">Status</p>
                   <Badge variant="success">Ready</Badge>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-              <p className="text-sm text-blue-400">
+            <div className="p-4 bg-status-info/10 border border-status-info/30 rounded-lg">
+              <p className="text-sm text-status-info">
                 This report contains comprehensive case information including evidence, timeline events, and analysis.
                 Click Download to get the full PDF report.
               </p>
