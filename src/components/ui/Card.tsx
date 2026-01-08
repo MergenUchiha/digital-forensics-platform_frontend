@@ -1,4 +1,3 @@
-// src/components/ui/Card.tsx
 import { HTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/utils/cn';
 
@@ -17,33 +16,25 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
           // Базовые стили
           'rounded-xl p-6 transition-all duration-300',
           
-          // Dark theme
-          'dark:bg-dark-bg-secondary',
-          'dark:border dark:border-dark-border-primary',
-          'dark:shadow-dark-lg',
+          // Фон и границы - автоматически меняются по теме
+          'bg-bg-secondary',
+          'border border-border-primary',
           
-          // Light theme
-          'bg-light-bg-secondary',
-          'border border-light-border-primary',
-          'shadow-light-lg',
+          // Тени - разные для светлой и темной темы
+          'shadow-light-lg dark:shadow-dark-lg',
           
           // Hover эффекты (если hoverable)
           hoverable && [
-            // Dark
-            'dark:hover:shadow-dark-xl',
-            'dark:hover:border-dark-border-secondary',
-            // Light
-            'hover:shadow-light-xl',
-            'hover:border-light-border-secondary',
-            // Common
+            'hover:shadow-light-xl dark:hover:shadow-dark-xl',
+            'hover:border-border-secondary',
             'hover-lift cursor-pointer',
           ],
           
           // Glow эффект для темной темы
-          glow && 'dark:shadow-glow-cyan dark:border-dark-border-glow',
+          glow && 'dark:shadow-glow-cyan dark:border-cyber-500/30',
           
           // Elevated вариант
-          elevated && 'dark:bg-dark-bg-elevated',
+          elevated && 'shadow-light-xl dark:shadow-dark-xl',
           
           className
         )}
@@ -63,10 +54,7 @@ export const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEleme
       ref={ref} 
       className={cn(
         'mb-4 pb-4',
-        // Dark theme
-        'dark:border-b dark:border-dark-border-primary',
-        // Light theme
-        'border-b border-light-border-primary',
+        'border-b border-border-primary',
         className
       )} 
       {...props} 
@@ -82,10 +70,7 @@ export const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadi
       ref={ref} 
       className={cn(
         'text-xl font-semibold',
-        // Dark theme
-        'dark:text-dark-text-primary',
-        // Light theme
-        'text-light-text-primary',
+        'text-text-primary',
         className
       )} 
       {...props} 
@@ -100,10 +85,7 @@ export const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElem
     <div 
       ref={ref} 
       className={cn(
-        // Dark theme
-        'dark:text-dark-text-secondary',
-        // Light theme
-        'text-light-text-secondary',
+        'text-text-secondary',
         className
       )} 
       {...props} 
@@ -119,10 +101,7 @@ export const CardFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEleme
       ref={ref} 
       className={cn(
         'mt-4 pt-4',
-        // Dark theme
-        'dark:border-t dark:border-dark-border-primary',
-        // Light theme
-        'border-t border-light-border-primary',
+        'border-t border-border-primary',
         className
       )} 
       {...props} 

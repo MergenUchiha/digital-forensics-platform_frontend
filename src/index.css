@@ -3,366 +3,168 @@
 @tailwind utilities;
 
 @layer base {
-  /* ============================================
-     БАЗОВЫЕ СТИЛИ
-     ============================================ */
+  /* CSS ПЕРЕМЕННЫЕ ДЛЯ АВТОМАТИЧЕСКОГО ПЕРЕКЛЮЧЕНИЯ ТЕМ */
+  :root {
+    /* СВЕТЛАЯ ТЕМА - по умолчанию */
+    
+    /* Текст - ТЕМНЫЙ на светлом фоне */
+    --color-text-primary: 26 32 44;        /* #1a202c - очень темный */
+    --color-text-secondary: 45 55 72;      /* #2d3748 - темно-серый */
+    --color-text-tertiary: 74 85 104;      /* #4a5568 - серый */
+    --color-text-muted: 113 128 150;       /* #718096 - светло-серый */
+    
+    /* Фон - СВЕТЛЫЙ */
+    --color-bg-primary: 248 250 252;       /* #f8fafc - очень светлый */
+    --color-bg-secondary: 255 255 255;     /* #ffffff - белый */
+    --color-bg-tertiary: 241 245 249;      /* #f1f5f9 */
+    --color-bg-hover: 226 232 240;         /* #e2e8f0 */
+    
+    /* Границы */
+    --color-border-primary: 226 232 240;   /* #e2e8f0 */
+    --color-border-secondary: 203 213 225; /* #cbd5e1 */
+    
+    /* Статусы для светлой темы - темные оттенки */
+    --color-status-success: 5 150 105;     /* #059669 - темно-зеленый */
+    --color-status-warning: 217 119 6;     /* #d97706 - темно-оранжевый */
+    --color-status-error: 220 38 38;       /* #dc2626 - темно-красный */
+    --color-status-info: 37 99 235;        /* #2563eb - темно-синий */
+  }
   
+  .dark {
+    /* ТЕМНАЯ ТЕМА */
+    
+    /* Текст - СВЕТЛЫЙ на темном фоне */
+    --color-text-primary: 243 244 246;     /* #f3f4f6 - очень светлый */
+    --color-text-secondary: 209 213 219;   /* #d1d5db - светло-серый */
+    --color-text-tertiary: 156 163 175;    /* #9ca3af - серый */
+    --color-text-muted: 107 114 128;       /* #6b7280 - темно-серый */
+    
+    /* Фон - ТЕМНЫЙ */
+    --color-bg-primary: 3 7 18;            /* #030712 - очень темный */
+    --color-bg-secondary: 17 24 39;        /* #111827 - темный */
+    --color-bg-tertiary: 31 41 55;         /* #1f2937 */
+    --color-bg-hover: 55 65 81;            /* #374151 */
+    
+    /* Границы */
+    --color-border-primary: 55 65 81;      /* #374151 */
+    --color-border-secondary: 75 85 99;    /* #4b5563 */
+    
+    /* Статусы для темной темы - яркие оттенки */
+    --color-status-success: 52 211 153;    /* #34d399 - яркий зеленый */
+    --color-status-warning: 251 191 36;    /* #fbbf24 - яркий желтый */
+    --color-status-error: 248 113 113;     /* #f87171 - яркий красный */
+    --color-status-info: 96 165 250;       /* #60a5fa - яркий синий */
+  }
+  
+  /* БАЗОВЫЕ СТИЛИ */
   body {
     @apply antialiased;
+    @apply bg-bg-primary text-text-primary;
     @apply transition-colors duration-300;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-
-  /* СВЕТЛАЯ ТЕМА - по умолчанию */
-  body {
-    @apply bg-light-bg-primary text-light-text-primary;
-  }
-
-  /* ТЕМНАЯ ТЕМА */
-  .dark body {
-    @apply bg-dark-bg-primary text-dark-text-primary;
-  }
   
-  /* Плавные переходы */
   * {
     @apply transition-colors duration-200;
   }
 }
 
 @layer components {
-  /* ============================================
-     CARDS - Карточки
-     ============================================ */
-  
+  /* CARDS */
   .card {
     @apply rounded-xl p-6;
+    @apply bg-bg-secondary border border-border-primary;
     @apply transition-all duration-300;
-    @apply hover:scale-[1.01];
-    
-    /* Светлая тема */
-    @apply bg-light-bg-secondary border border-light-border-primary;
-    @apply shadow-light-lg hover:shadow-light-xl;
-    
-    /* Темная тема */
-    @apply dark:bg-dark-bg-secondary dark:border-dark-border-primary;
-    @apply dark:shadow-dark-lg dark:hover:shadow-dark-xl;
   }
   
-  .card-elevated {
-    @apply card;
-    @apply dark:shadow-glow-cyan-sm dark:hover:shadow-glow-cyan;
+  .card:hover {
+    @apply border-border-secondary;
+    @apply shadow-light-lg;
   }
   
+  .dark .card:hover {
+    @apply shadow-dark-lg;
+  }
   
-  /* ============================================
-     BUTTONS - Кнопки
-     ============================================ */
+  /* BUTTONS */
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-cyber-500;
+  }
   
-  /* Primary Button */
   .btn-primary {
-    @apply px-4 py-2 rounded-lg font-medium;
-    @apply transition-all duration-200;
-    @apply bg-cyber-500 hover:bg-cyber-600 text-white;
-    @apply hover:scale-105 active:scale-95;
-    @apply focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:ring-offset-2;
-    
-    /* Светлая тема */
-    @apply shadow-light-md hover:shadow-light-lg;
-    @apply focus:ring-offset-light-bg-primary;
-    
-    /* Темная тема */
-    @apply dark:shadow-glow-cyan-sm dark:hover:shadow-glow-cyan;
-    @apply dark:focus:ring-offset-dark-bg-primary;
-  }
-  
-  /* Secondary Button */
-  .btn-secondary {
-    @apply px-4 py-2 rounded-lg font-medium;
-    @apply transition-all duration-200;
-    @apply hover:scale-105 active:scale-95;
-    
-    /* Светлая тема */
-    @apply bg-light-bg-tertiary hover:bg-light-bg-hover;
-    @apply text-light-text-primary;
-    @apply border border-light-border-primary hover:border-light-border-secondary;
-    @apply shadow-light-sm hover:shadow-light-md;
-    
-    /* Темная тема */
-    @apply dark:bg-dark-bg-tertiary dark:hover:bg-dark-bg-hover;
-    @apply dark:text-dark-text-primary;
-    @apply dark:border-dark-border-primary dark:hover:border-dark-border-secondary;
-  }
-  
-  /* Ghost Button */
-  .btn-ghost {
-    @apply px-4 py-2 rounded-lg font-medium;
-    @apply transition-all duration-200;
-    
-    /* Светлая тема */
-    @apply hover:bg-light-bg-hover;
-    @apply text-light-text-secondary hover:text-light-text-primary;
-    
-    /* Темная тема */
-    @apply dark:hover:bg-dark-bg-hover;
-    @apply dark:text-dark-text-secondary dark:hover:text-dark-text-primary;
-  }
-  
-  /* Danger Button */
-  .btn-danger {
-    @apply px-4 py-2 rounded-lg font-medium;
-    @apply transition-all duration-200;
+    @apply bg-cyber-500 hover:bg-cyber-600;
     @apply text-white;
     @apply hover:scale-105 active:scale-95;
-    
-    /* Светлая тема */
-    @apply bg-status-error-light hover:bg-red-600;
-    @apply shadow-light-md hover:shadow-light-lg;
-    
-    /* Темная тема */
-    @apply dark:bg-status-error-dark dark:hover:bg-red-500;
   }
   
+  .btn-secondary {
+    @apply bg-bg-tertiary hover:bg-bg-hover;
+    @apply text-text-primary;
+    @apply border border-border-primary hover:border-border-secondary;
+  }
   
-  /* ============================================
-     INPUTS - Поля ввода
-     ============================================ */
-  
-  .input-field {
+  /* INPUTS */
+  .input {
     @apply w-full px-4 py-2 rounded-lg;
-    @apply transition-all duration-200;
+    @apply bg-bg-secondary border border-border-primary;
+    @apply text-text-primary placeholder-text-muted;
     @apply focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent;
-    
-    /* Светлая тема */
-    @apply bg-light-bg-input border border-light-border-input;
-    @apply text-light-text-primary placeholder-light-text-muted;
-    @apply shadow-light-sm focus:shadow-light-md;
-    @apply hover:border-light-border-secondary;
-    
-    /* Темная тема */
-    @apply dark:bg-dark-bg-input dark:border-dark-border-input;
-    @apply dark:text-dark-text-primary dark:placeholder-dark-text-muted;
-    @apply dark:hover:border-dark-border-secondary;
+    @apply hover:border-border-secondary;
   }
   
-  
-  /* ============================================
-     BADGES - Статусные бейджи
-     ============================================ */
-  
+  /* BADGES */
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-    @apply transition-all duration-200;
   }
   
   .badge-success {
-    /* Светлая тема */
-    @apply bg-green-100 text-green-900 border border-green-300;
-    
-    /* Темная тема */
-    @apply dark:bg-green-500/20 dark:text-status-success-dark;
-    @apply dark:border dark:border-green-500/30;
+    @apply bg-status-success/20 text-status-success;
+    @apply border border-status-success/30;
   }
   
   .badge-warning {
-    /* Светлая тема */
-    @apply bg-amber-100 text-amber-900 border border-amber-300;
-    
-    /* Темная тема */
-    @apply dark:bg-yellow-500/20 dark:text-status-warning-dark;
-    @apply dark:border dark:border-yellow-500/30;
+    @apply bg-status-warning/20 text-status-warning;
+    @apply border border-status-warning/30;
   }
   
   .badge-error {
-    /* Светлая тема */
-    @apply bg-red-100 text-red-900 border border-red-300;
-    
-    /* Темная тема */
-    @apply dark:bg-red-500/20 dark:text-status-error-dark;
-    @apply dark:border dark:border-red-500/30;
+    @apply bg-status-error/20 text-status-error;
+    @apply border border-status-error/30;
   }
   
   .badge-info {
-    /* Светлая тема */
-    @apply bg-blue-100 text-blue-900 border border-blue-300;
-    
-    /* Темная тема */
-    @apply dark:bg-blue-500/20 dark:text-status-info-dark;
-    @apply dark:border dark:border-blue-500/30;
+    @apply bg-status-info/20 text-status-info;
+    @apply border border-status-info/30;
   }
   
-  
-  /* ============================================
-     SIDEBAR - Навигация
-     ============================================ */
-  
-  .sidebar {
-    /* Светлая тема */
-    @apply bg-light-bg-secondary border-r border-light-border-primary;
-    @apply shadow-light-xl;
-    
-    /* Темная тема */
-    @apply dark:bg-dark-bg-secondary dark:border-r dark:border-dark-border-primary;
-    @apply dark:shadow-dark-xl;
-  }
-  
-  .sidebar-link {
-    @apply flex items-center gap-3 px-4 py-3 rounded-lg;
-    @apply transition-all duration-200;
-    
-    /* Светлая тема */
-    @apply text-light-text-secondary hover:text-light-text-primary;
-    @apply hover:bg-light-state-hover;
-    
-    /* Темная тема */
-    @apply dark:text-dark-text-secondary dark:hover:text-dark-text-primary;
-    @apply dark:hover:bg-dark-state-hover;
-  }
-  
-  .sidebar-link-active {
-    @apply sidebar-link;
-    @apply font-medium;
-    
-    /* Светлая тема */
-    @apply bg-cyan-50 text-cyber-500;
-    @apply border border-cyan-200;
-    
-    /* Темная тема */
-    @apply dark:bg-cyber-500/10 dark:text-cyber-400;
-    @apply dark:border dark:border-cyan-500/30;
-    @apply dark:shadow-glow-cyan-sm;
-  }
-  
-  
-  /* ============================================
-     MODALS - Модальные окна
-     ============================================ */
-  
-  .modal-backdrop {
-    @apply fixed inset-0 backdrop-blur-sm;
-    
-    /* Светлая тема */
-    @apply bg-black/40;
-    
-    /* Темная тема */
-    @apply dark:bg-black/70;
-  }
-  
-  .modal-content {
-    @apply rounded-xl;
-    
-    /* Светлая тема */
-    @apply bg-light-bg-secondary border border-light-border-primary;
-    @apply shadow-light-2xl;
-    
-    /* Темная тема */
-    @apply dark:bg-dark-bg-secondary dark:border dark:border-dark-border-primary;
-    @apply dark:shadow-dark-2xl;
-  }
-  
-  
-  /* ============================================
-     SCROLLBAR - Кастомный скроллбар
-     ============================================ */
-  
+  /* SCROLLBAR */
   ::-webkit-scrollbar {
     @apply w-2 h-2;
   }
   
   ::-webkit-scrollbar-track {
-    /* Светлая тема */
-    @apply bg-light-bg-tertiary;
-    
-    /* Темная тема */
-    @apply dark:bg-dark-bg-primary;
+    @apply bg-bg-tertiary;
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply rounded-full;
-    
-    /* Светлая тема */
-    @apply bg-light-border-primary hover:bg-light-border-secondary;
-    
-    /* Темная тема */
-    @apply dark:bg-dark-border-primary dark:hover:bg-dark-border-secondary;
-  }
-  
-  
-  /* ============================================
-     UTILITY CLASSES - Вспомогательные классы
-     ============================================ */
-  
-  .text-gradient {
-    @apply bg-gradient-cyber bg-clip-text text-transparent;
-  }
-  
-  .hover-lift {
-    @apply transition-transform duration-300;
-    @apply hover:-translate-y-1;
-    
-    /* Светлая тема */
-    @apply hover:shadow-light-xl;
-    
-    /* Темная тема */
-    @apply dark:hover:shadow-dark-xl;
-  }
-  
-  .cyber-glow {
-    @apply transition-shadow duration-300;
-    
-    /* Только для темной темы */
-    @apply dark:shadow-glow-cyan-sm dark:hover:shadow-glow-cyan;
-  }
-  
-  /* Интерактивная карточка */
-  .interactive-card {
-    @apply card cursor-pointer;
-    @apply hover:scale-[1.02] hover:-translate-y-1;
-    @apply active:scale-100 active:translate-y-0;
-    @apply transition-all duration-200;
-    
-    /* Светлая тема */
-    @apply hover:shadow-light-2xl hover:border-cyan-200;
-    
-    /* Темная тема */
-    @apply dark:hover:shadow-glow-cyan dark:hover:border-cyan-500/50;
+    @apply rounded-full bg-border-primary hover:bg-border-secondary;
   }
 }
 
-/* ============================================
-   АНИМАЦИИ
-   ============================================ */
-
+/* АНИМАЦИИ */
 @keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
 }
 
 .shimmer {
   animation: shimmer 2s infinite linear;
+  background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.2), transparent);
   background-size: 1000px 100%;
-  
-  /* Светлая тема */
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(0, 217, 255, 0.1),
-    transparent
-  );
-}
-
-.dark .shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(0, 217, 255, 0.2),
-    transparent
-  );
 }
 
 .fade-in {
@@ -377,19 +179,5 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* ============================================
-   ПЕЧАТЬ
-   ============================================ */
-
-@media print {
-  body {
-    @apply bg-white text-black;
-  }
-  
-  .no-print {
-    display: none !important;
   }
 }

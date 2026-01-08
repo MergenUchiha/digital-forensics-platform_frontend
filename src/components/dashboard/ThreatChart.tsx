@@ -1,5 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface ThreatData {
   name: string;
@@ -12,6 +13,18 @@ interface ThreatChartProps {
 }
 
 export const ThreatChart = ({ data }: ThreatChartProps) => {
+  const { theme } = useTheme();
+  
+  // Цвета для графика в зависимости от темы
+  const chartColors = {
+    grid: theme === 'dark' ? '#374151' : '#e5e7eb',
+    axis: theme === 'dark' ? '#9CA3AF' : '#6b7280',
+    bar: '#00d9ff',
+    tooltipBg: theme === 'dark' ? '#1F2937' : '#ffffff',
+    tooltipBorder: theme === 'dark' ? '#374151' : '#e5e7eb',
+    tooltipText: theme === 'dark' ? '#F3F4F6' : '#1a202c',
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -20,27 +33,28 @@ export const ThreatChart = ({ data }: ThreatChartProps) => {
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
             <XAxis 
               dataKey="name" 
-              stroke="#9CA3AF" 
-              tick={{ fill: '#9CA3AF' }}
+              stroke={chartColors.axis} 
+              tick={{ fill: chartColors.axis }}
             />
             <YAxis 
-              stroke="#9CA3AF" 
-              tick={{ fill: '#9CA3AF' }}
+              stroke={chartColors.axis} 
+              tick={{ fill: chartColors.axis }}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#1F2937',
-                border: '1px solid #374151',
+                backgroundColor: chartColors.tooltipBg,
+                border: `1px solid ${chartColors.tooltipBorder}`,
                 borderRadius: '8px',
-                color: '#F3F4F6',
+                color: chartColors.tooltipText,
               }}
+              cursor={{ fill: theme === 'dark' ? 'rgba(55, 65, 81, 0.3)' : 'rgba(229, 231, 235, 0.3)' }}
             />
             <Bar 
               dataKey="count" 
-              fill="#00d9ff" 
+              fill={chartColors.bar} 
               radius={[8, 8, 0, 0]}
             />
           </BarChart>

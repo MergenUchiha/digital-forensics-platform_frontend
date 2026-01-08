@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Shield, Mail, Lock, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/utils/cn';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -74,7 +75,10 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center p-4">
+    <div className={cn(
+      'min-h-screen flex items-center justify-center p-4',
+      'bg-gradient-to-br from-bg-primary via-bg-secondary to-bg-primary',
+    )}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -82,16 +86,20 @@ export const Login = () => {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-cyber-400 to-cyber-600 rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-cyber-400 to-cyber-600 rounded-2xl mb-4 shadow-glow-cyan-sm">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white">{t.app.title}</h1>
-          <p className="text-gray-400 dark:text-gray-400">{t.app.subtitle}</p>
+          <h1 className="text-3xl font-bold text-text-primary">{t.app.title}</h1>
+          <p className="text-text-tertiary">{t.app.subtitle}</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-gray-900/50 dark:bg-gray-900/50 backdrop-blur-xl border border-gray-800 dark:border-gray-800 rounded-2xl p-8 shadow-2xl">
-          <h2 className="text-2xl font-bold text-white mb-6">{t.auth.login}</h2>
+        <div className={cn(
+          'rounded-2xl p-8',
+          'bg-bg-secondary border border-border-primary',
+          'shadow-light-xl dark:shadow-dark-xl',
+        )}>
+          <h2 className="text-2xl font-bold text-text-primary mb-6">{t.auth.login}</h2>
 
           {/* General Error Message */}
           <AnimatePresence>
@@ -102,11 +110,11 @@ export const Login = () => {
                 exit={{ opacity: 0, y: -10, height: 0 }}
                 className="mb-4 overflow-hidden"
               >
-                <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <div className="p-4 bg-status-error/10 border border-status-error/50 rounded-lg flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-status-error flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-red-400 mb-1">{t.auth.loginFailed}</p>
-                    <p className="text-sm text-red-300">{errors.general}</p>
+                    <p className="text-sm font-medium text-status-error mb-1">{t.auth.loginFailed}</p>
+                    <p className="text-sm text-status-error/80">{errors.general}</p>
                   </div>
                 </div>
               </motion.div>
@@ -116,48 +124,42 @@ export const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-text-primary mb-2">
                 {t.auth.email}
               </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setErrors(prev => ({ ...prev, email: undefined, general: undefined }));
-                  }}
-                  placeholder="analyst@forensics.io"
-                  className="pl-10"
-                  error={errors.email}
-                  disabled={isLoading}
-                  autoComplete="email"
-                />
-              </div>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setErrors(prev => ({ ...prev, email: undefined, general: undefined }));
+                }}
+                placeholder="analyst@forensics.io"
+                icon={<Mail className="w-5 h-5" />}
+                error={errors.email}
+                disabled={isLoading}
+                autoComplete="email"
+              />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-text-primary mb-2">
                 {t.auth.password}
               </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setErrors(prev => ({ ...prev, password: undefined, general: undefined }));
-                  }}
-                  placeholder="••••••••"
-                  className="pl-10"
-                  error={errors.password}
-                  disabled={isLoading}
-                  autoComplete="current-password"
-                />
-              </div>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setErrors(prev => ({ ...prev, password: undefined, general: undefined }));
+                }}
+                placeholder="••••••••"
+                icon={<Lock className="w-5 h-5" />}
+                error={errors.password}
+                disabled={isLoading}
+                autoComplete="current-password"
+              />
             </div>
 
             {/* Submit Button */}
@@ -166,21 +168,15 @@ export const Login = () => {
               variant="primary"
               className="w-full mt-6"
               disabled={isLoading}
+              loading={isLoading}
             >
-              {isLoading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  {t.common.loading}
-                </div>
-              ) : (
-                t.auth.login
-              )}
+              {t.auth.login}
             </Button>
           </form>
 
           {/* Register Link */}
           <div className="mt-6 text-center">
-            <p className="text-gray-400 dark:text-gray-400 text-sm">
+            <p className="text-text-tertiary text-sm">
               {t.auth.dontHaveAccount}{' '}
               <Link
                 to="/register"
@@ -199,11 +195,11 @@ export const Login = () => {
           transition={{ delay: 0.3 }}
           className="mt-6"
         >
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-            <p className="text-blue-400 text-sm font-medium mb-2">{t.auth.demoCredentials}</p>
-            <div className="space-y-1 text-xs text-gray-400 dark:text-gray-400">
-              <p><span className="text-gray-500">Email:</span> analyst@forensics.io</p>
-              <p><span className="text-gray-500">Password:</span> demo123</p>
+          <div className="bg-status-info/10 border border-status-info/30 rounded-lg p-4">
+            <p className="text-status-info text-sm font-medium mb-2">{t.auth.demoCredentials}</p>
+            <div className="space-y-1 text-xs text-text-tertiary">
+              <p><span className="text-text-muted">Email:</span> analyst@forensics.io</p>
+              <p><span className="text-text-muted">Password:</span> demo123</p>
             </div>
           </div>
         </motion.div>
