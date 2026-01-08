@@ -34,7 +34,7 @@ const colors = {
 export const Notification = ({ notification, onClose }: NotificationProps) => {
   const Icon = icons[notification.type];
   const [progress, setProgress] = useState(100);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     const duration = notification.duration || 5000;
@@ -89,7 +89,7 @@ export const Notification = ({ notification, onClose }: NotificationProps) => {
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800 rounded-b-lg overflow-hidden">
         <motion.div
           className="h-full bg-current"
-          style={{ width: `${progress}%` }}
+          animate={{ width: `${progress}%` }}
           transition={{ duration: 0.05, ease: 'linear' }}
         />
       </div>
