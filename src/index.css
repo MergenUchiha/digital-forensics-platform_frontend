@@ -3,35 +3,42 @@
 @tailwind utilities;
 
 @layer base {
-  /* CSS ПЕРЕМЕННЫЕ ДЛЯ АВТОМАТИЧЕСКОГО ПЕРЕКЛЮЧЕНИЯ ТЕМ */
+  /* ==========================================
+     CSS ПЕРЕМЕННЫЕ ДЛЯ АВТОМАТИЧЕСКОГО ПЕРЕКЛЮЧЕНИЯ ТЕМ
+     ========================================== */
+  
   :root {
-    /* СВЕТЛАЯ ТЕМА - по умолчанию */
+    /* ==========================================
+       УЛУЧШЕННАЯ СВЕТЛАЯ ТЕМА - по умолчанию
+       ========================================== */
     
-    /* Текст - ТЕМНЫЙ на светлом фоне */
-    --color-text-primary: 26 32 44;        /* #1a202c - очень темный */
-    --color-text-secondary: 45 55 72;      /* #2d3748 - темно-серый */
-    --color-text-tertiary: 74 85 104;      /* #4a5568 - серый */
-    --color-text-muted: 113 128 150;       /* #718096 - светло-серый */
+    /* Текст - КОНТРАСТНЫЕ ТЕМНЫЕ цвета на светлом фоне */
+    --color-text-primary: 17 24 39;        /* #111827 - почти черный для максимального контраста */
+    --color-text-secondary: 31 41 55;      /* #1f2937 - очень темный для хорошей читаемости */
+    --color-text-tertiary: 55 65 81;       /* #374151 - темно-серый, хорошо виден на светлом */
+    --color-text-muted: 107 114 128;       /* #6b7280 - средне-серый, достаточный контраст */
     
-    /* Фон - СВЕТЛЫЙ */
-    --color-bg-primary: 248 250 252;       /* #f8fafc - очень светлый */
-    --color-bg-secondary: 255 255 255;     /* #ffffff - белый */
-    --color-bg-tertiary: 241 245 249;      /* #f1f5f9 */
-    --color-bg-hover: 226 232 240;         /* #e2e8f0 */
+    /* Фон - КОНТРАСТНЫЕ СВЕТЛЫЕ цвета с видимым разделением */
+    --color-bg-primary: 249 250 251;       /* #f9fafb - светло-серый основной фон */
+    --color-bg-secondary: 255 255 255;     /* #ffffff - белый для карточек */
+    --color-bg-tertiary: 243 244 246;      /* #f3f4f6 - серый для элементов */
+    --color-bg-hover: 229 231 235;         /* #e5e7eb - темнее для активного hover */
     
-    /* Границы */
-    --color-border-primary: 226 232 240;   /* #e2e8f0 */
-    --color-border-secondary: 203 213 225; /* #cbd5e1 */
+    /* Границы - ВИДИМЫЕ границы */
+    --color-border-primary: 229 231 235;   /* #e5e7eb - четкие границы */
+    --color-border-secondary: 209 213 219; /* #d1d5db - более темные для акцента */
     
-    /* Статусы для светлой темы - темные оттенки */
+    /* Статусы для светлой темы - ЯРКИЕ и КОНТРАСТНЫЕ */
     --color-status-success: 5 150 105;     /* #059669 - темно-зеленый */
     --color-status-warning: 217 119 6;     /* #d97706 - темно-оранжевый */
-    --color-status-error: 220 38 38;       /* #dc2626 - темно-красный */
-    --color-status-info: 37 99 235;        /* #2563eb - темно-синий */
+    --color-status-error: 220 38 38;       /* #dc2626 - ярко-красный */
+    --color-status-info: 37 99 235;        /* #2563eb - ярко-синий */
   }
   
   .dark {
-    /* ТЕМНАЯ ТЕМА */
+    /* ==========================================
+       ТЕМНАЯ ТЕМА
+       ========================================== */
     
     /* Текст - СВЕТЛЫЙ на темном фоне */
     --color-text-primary: 243 244 246;     /* #f3f4f6 - очень светлый */
@@ -56,7 +63,10 @@
     --color-status-info: 96 165 250;       /* #60a5fa - яркий синий */
   }
   
-  /* БАЗОВЫЕ СТИЛИ */
+  /* ==========================================
+     БАЗОВЫЕ СТИЛИ
+     ========================================== */
+  
   body {
     @apply antialiased;
     @apply bg-bg-primary text-text-primary;
@@ -69,10 +79,26 @@
   * {
     @apply transition-colors duration-200;
   }
+  
+  /* Улучшенные фокус состояния для доступности */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-cyber-500 ring-offset-2;
+  }
+  
+  .dark *:focus-visible {
+    @apply ring-offset-gray-900;
+  }
+  
+  *:focus-visible {
+    @apply ring-offset-white;
+  }
 }
 
 @layer components {
-  /* CARDS */
+  /* ==========================================
+     CARDS
+     ========================================== */
+  
   .card {
     @apply rounded-xl p-6;
     @apply bg-bg-secondary border border-border-primary;
@@ -88,7 +114,10 @@
     @apply shadow-dark-lg;
   }
   
-  /* BUTTONS */
+  /* ==========================================
+     BUTTONS
+     ========================================== */
+  
   .btn {
     @apply px-4 py-2 rounded-lg font-medium;
     @apply transition-all duration-200;
@@ -107,7 +136,10 @@
     @apply border border-border-primary hover:border-border-secondary;
   }
   
-  /* INPUTS */
+  /* ==========================================
+     INPUTS
+     ========================================== */
+  
   .input {
     @apply w-full px-4 py-2 rounded-lg;
     @apply bg-bg-secondary border border-border-primary;
@@ -116,7 +148,10 @@
     @apply hover:border-border-secondary;
   }
   
-  /* BADGES */
+  /* ==========================================
+     BADGES
+     ========================================== */
+  
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
@@ -141,7 +176,10 @@
     @apply border border-status-info/30;
   }
   
-  /* SCROLLBAR */
+  /* ==========================================
+     SCROLLBAR - улучшенный для обеих тем
+     ========================================== */
+  
   ::-webkit-scrollbar {
     @apply w-2 h-2;
   }
@@ -151,24 +189,39 @@
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-border-primary hover:bg-border-secondary;
+    @apply rounded-full bg-border-secondary;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text-muted;
+  }
+  
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-border-primary;
+  }
+  
+  .dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-border-secondary;
   }
 }
 
-/* АНИМАЦИИ */
+/* ==========================================
+   АНИМАЦИИ
+   ========================================== */
+
 @keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
+  0% { 
+    background-position: -1000px 0; 
+  }
+  100% { 
+    background-position: 1000px 0; 
+  }
 }
 
 .shimmer {
   animation: shimmer 2s infinite linear;
   background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.2), transparent);
   background-size: 1000px 100%;
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-in;
 }
 
 @keyframes fadeIn {
@@ -180,4 +233,51 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* ==========================================
+   HOVER ЭФФЕКТЫ
+   ========================================== */
+
+.hover-lift {
+  @apply transition-transform duration-200;
+}
+
+.hover-lift:hover {
+  @apply -translate-y-0.5;
+}
+
+/* ==========================================
+   ДОПОЛНИТЕЛЬНЫЕ УТИЛИТЫ
+   ========================================== */
+
+/* Gradient text effect */
+.gradient-text {
+  @apply bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-cyber-400 to-purple-500;
+}
+
+/* Glass morphism effect */
+.glass {
+  @apply bg-white/80 dark:bg-gray-900/80;
+  @apply backdrop-blur-lg;
+  @apply border border-border-primary;
+}
+
+/* Pulse animation for notifications */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

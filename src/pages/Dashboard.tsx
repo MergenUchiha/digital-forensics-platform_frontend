@@ -13,6 +13,7 @@ export const Dashboard = () => {
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [cases, setCases] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showThemeTest, setShowThemeTest] = useState(true); // Показываем тестовый компонент
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -60,62 +61,75 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div>
-        <h1 className="text-3xl font-bold text-text-primary">{t.dashboard.title}</h1>
-        <p className="text-text-secondary mt-1">{t.dashboard.subtitle}</p>
-      </div>
+    <>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title={t.dashboard.totalEvents}
-          value={dashboardStats.totalEvents || 0}
-          icon={Activity}
-          color="blue"
-        />
-        <StatCard
-          title={t.dashboard.criticalAlerts}
-          value={dashboardStats.criticalAlerts || 0}
-          icon={AlertTriangle}
-          color="red"
-        />
-        <StatCard
-          title={t.dashboard.activeIncidents}
-          value={dashboardStats.activeIncidents || 0}
-          icon={FolderOpen}
-          color="green"
-        />
-        <StatCard
-          title={t.dashboard.threatsBlocked}
-          value={dashboardStats.threatsBlocked || 0}
-          icon={Database}
-          color="purple"
-        />
-      </div>
+      <div className="space-y-6">
+        {/* Page header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-text-primary">{t.dashboard.title}</h1>
+            <p className="text-text-secondary mt-1">{t.dashboard.subtitle}</p>
+          </div>
+          
+          {/* Кнопка для скрытия тестового компонента */}
+          <button
+            onClick={() => setShowThemeTest(!showThemeTest)}
+            className="px-3 py-1 text-xs bg-bg-tertiary hover:bg-bg-hover text-text-primary rounded border border-border-primary"
+          >
+            {showThemeTest ? 'Hide' : 'Show'} Theme Test
+          </button>
+        </div>
 
-      {/* World Map */}
-      <WorldMap cases={cases} />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard
+            title={t.dashboard.totalEvents}
+            value={dashboardStats.totalEvents || 0}
+            icon={Activity}
+            color="blue"
+          />
+          <StatCard
+            title={t.dashboard.criticalAlerts}
+            value={dashboardStats.criticalAlerts || 0}
+            icon={AlertTriangle}
+            color="red"
+          />
+          <StatCard
+            title={t.dashboard.activeIncidents}
+            value={dashboardStats.activeIncidents || 0}
+            icon={FolderOpen}
+            color="green"
+          />
+          <StatCard
+            title={t.dashboard.threatsBlocked}
+            value={dashboardStats.threatsBlocked || 0}
+            icon={Database}
+            color="purple"
+          />
+        </div>
 
-      {/* Charts and Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ThreatChart data={[
-          { name: 'Data Breach', count: 15, trend: 'up' },
-          { name: 'Malware', count: 12, trend: 'stable' },
-          { name: 'DDoS', count: 8, trend: 'down' },
-          { name: 'Phishing', count: 5, trend: 'up' },
-        ]} />
-        <ActivityFeed activities={[
-          {
-            id: '1',
-            type: 'case_created',
-            title: 'New case created',
-            timestamp: new Date().toISOString(),
-            user: { name: 'System' },
-          },
-        ]} />
+        {/* World Map */}
+        <WorldMap cases={cases} />
+
+        {/* Charts and Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ThreatChart data={[
+            { name: 'Data Breach', count: 15, trend: 'up' },
+            { name: 'Malware', count: 12, trend: 'stable' },
+            { name: 'DDoS', count: 8, trend: 'down' },
+            { name: 'Phishing', count: 5, trend: 'up' },
+          ]} />
+          <ActivityFeed activities={[
+            {
+              id: '1',
+              type: 'case_created',
+              title: 'New case created',
+              timestamp: new Date().toISOString(),
+              user: { name: 'System' },
+            },
+          ]} />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
