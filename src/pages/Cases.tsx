@@ -25,7 +25,6 @@ export const Cases = () => {
       setError(null);
       const data = await casesService.getAll(statusFilter === 'all' ? undefined : statusFilter);
       
-      // Нормализуем данные для безопасного отображения
       const normalizedData = data.map(c => ({
         ...c,
         severity: (c.severity || 'medium').toLowerCase(),
@@ -53,7 +52,6 @@ export const Cases = () => {
 
   const handleCreateCase = async (data: CaseFormData) => {
     try {
-      // Преобразуем данные в формат API
       const apiData = {
         title: data.title,
         description: data.description,
@@ -100,7 +98,7 @@ export const Cases = () => {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-cyber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading cases...</p>
+          <p className="text-text-secondary">Loading cases...</p>
         </div>
       </div>
     );
@@ -110,9 +108,9 @@ export const Cases = () => {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <div className="w-16 h-16 text-red-500 mx-auto mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-gray-100 mb-2">Error Loading Cases</h2>
-          <p className="text-gray-400 mb-4">{error}</p>
+          <div className="w-16 h-16 text-status-error mx-auto mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-text-primary mb-2">Error Loading Cases</h2>
+          <p className="text-text-secondary mb-4">{error}</p>
           <Button onClick={fetchCases}>Try Again</Button>
         </div>
       </div>
@@ -124,8 +122,8 @@ export const Cases = () => {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-100">Cases</h1>
-          <p className="text-gray-400 mt-1">Manage and track investigation cases</p>
+          <h1 className="text-3xl font-bold text-text-primary">Cases</h1>
+          <p className="text-text-secondary mt-1">Manage and track investigation cases</p>
         </div>
         <Button className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
           <Plus className="w-4 h-4" />
@@ -136,7 +134,7 @@ export const Cases = () => {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
           <Input
             type="text"
             placeholder="Search cases..."
@@ -186,7 +184,7 @@ export const Cases = () => {
 
       {filteredCases.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-400">No cases found matching your criteria</p>
+          <p className="text-text-secondary">No cases found matching your criteria</p>
         </div>
       )}
 

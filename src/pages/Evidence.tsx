@@ -120,7 +120,7 @@ export const Evidence = () => {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-cyber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading evidence...</p>
+          <p className="text-text-secondary">Loading evidence...</p>
         </div>
       </div>
     );
@@ -131,8 +131,8 @@ export const Evidence = () => {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-100">Evidence</h1>
-          <p className="text-gray-400 mt-1">Collect and manage digital evidence</p>
+          <h1 className="text-3xl font-bold text-text-primary">Evidence</h1>
+          <p className="text-text-secondary mt-1">Collect and manage digital evidence</p>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export const Evidence = () => {
             <select
               value={selectedCase}
               onChange={(e) => setSelectedCase(e.target.value)}
-              className="px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+              className="px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500"
             >
               <option value="all">All Cases</option>
               {cases.map(c => (
@@ -179,10 +179,10 @@ export const Evidence = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="p-4 bg-gray-900 border border-gray-800 rounded-lg"
+            className="p-4 bg-bg-secondary border border-border-primary rounded-lg"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-200">Advanced Filters</h3>
+              <h3 className="text-sm font-semibold text-text-primary">Advanced Filters</h3>
               {hasActiveFilters && (
                 <Button 
                   variant="ghost" 
@@ -198,13 +198,13 @@ export const Evidence = () => {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-text-primary mb-2">
                   Evidence Type
                 </label>
                 <select
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+                  className="w-full px-4 py-2 bg-bg-tertiary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500"
                 >
                   <option value="all">All Types</option>
                   <option value="LOG">Log</option>
@@ -217,10 +217,10 @@ export const Evidence = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-text-primary mb-2">
                   Results
                 </label>
-                <div className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400">
+                <div className="px-4 py-2 bg-bg-tertiary border border-border-primary rounded-lg text-text-secondary">
                   {filteredEvidence.length} of {evidence.length} items
                 </div>
               </div>
@@ -258,7 +258,7 @@ export const Evidence = () => {
 
       {filteredEvidence.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-400">
+          <p className="text-text-secondary">
             {hasActiveFilters ? 'No evidence found matching your filters' : 'No evidence found'}
           </p>
           {hasActiveFilters && (
@@ -283,7 +283,7 @@ export const Evidence = () => {
       >
         <form onSubmit={handleUploadEvidence} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               Evidence Name *
             </label>
             <Input
@@ -296,13 +296,13 @@ export const Evidence = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               Type *
             </label>
             <select
               value={uploadData.type}
               onChange={(e) => setUploadData({ ...uploadData, type: e.target.value as any })}
-              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+              className="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500"
               required
             >
               <option value="LOG">Log</option>
@@ -315,13 +315,13 @@ export const Evidence = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               Case *
             </label>
             <select
               value={uploadData.caseId}
               onChange={(e) => setUploadData({ ...uploadData, caseId: e.target.value })}
-              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+              className="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500"
               required
             >
               <option value="">Select a case...</option>
@@ -332,7 +332,7 @@ export const Evidence = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               Description
             </label>
             <textarea
@@ -340,7 +340,7 @@ export const Evidence = () => {
               onChange={(e) => setUploadData({ ...uploadData, description: e.target.value })}
               placeholder="Describe the evidence..."
               rows={3}
-              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyber-500"
+              className="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-cyber-500"
             />
           </div>
 

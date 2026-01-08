@@ -195,8 +195,8 @@ export const Settings = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-100 dark:text-gray-100">{t.settings.title}</h1>
-        <p className="text-gray-400 dark:text-gray-400 mt-1">{t.settings.subtitle}</p>
+        <h1 className="text-3xl font-bold text-text-primary">{t.settings.title}</h1>
+        <p className="text-text-secondary mt-1">{t.settings.subtitle}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -213,7 +213,7 @@ export const Settings = () => {
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                   isActive 
                     ? 'bg-cyber-500/10 text-cyber-400 border border-cyber-500/30' 
-                    : 'text-gray-400 dark:text-gray-400 hover:bg-gray-800 dark:hover:bg-gray-800 hover:text-gray-200'
+                    : 'text-text-secondary hover:bg-bg-hover hover:text-text-primary'
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -233,7 +233,7 @@ export const Settings = () => {
               <CardContent>
                 <form onSubmit={handleSaveProfile} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-text-primary mb-2">
                       {t.settings.fullName}
                     </label>
                     <Input
@@ -246,7 +246,7 @@ export const Settings = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-text-primary mb-2">
                       {t.auth.email}
                     </label>
                     <Input
@@ -255,11 +255,11 @@ export const Settings = () => {
                       placeholder={t.auth.email}
                       disabled
                     />
-                    <p className="text-xs text-gray-500 mt-1">{t.settings.emailCannotChange}</p>
+                    <p className="text-xs text-text-muted mt-1">{t.settings.emailCannotChange}</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-text-primary mb-2">
                       {t.settings.role}
                     </label>
                     <Input
@@ -287,7 +287,7 @@ export const Settings = () => {
               <CardContent>
                 <form onSubmit={handleUpdatePassword} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-text-primary mb-2">
                       {t.settings.currentPassword} *
                     </label>
                     <Input
@@ -300,7 +300,7 @@ export const Settings = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-text-primary mb-2">
                       {t.settings.newPassword} *
                     </label>
                     <Input
@@ -313,7 +313,7 @@ export const Settings = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-text-primary mb-2">
                       {t.settings.confirmNewPassword} *
                     </label>
                     <Input
@@ -325,8 +325,8 @@ export const Settings = () => {
                     />
                   </div>
 
-                  <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                    <p className="text-sm text-blue-400">
+                  <div className="p-3 bg-status-info/10 border border-status-info/30 rounded-lg">
+                    <p className="text-sm text-status-info">
                       ℹ️ {t.settings.passwordTooShort}
                     </p>
                   </div>
@@ -348,10 +348,10 @@ export const Settings = () => {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSaveNotifications} className="space-y-4">
-                  <div className="flex items-center justify-between py-3 border-b border-gray-800 dark:border-gray-800">
+                  <div className="flex items-center justify-between py-3 border-b border-border-primary">
                     <div>
-                      <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.emailNotifications}</p>
-                      <p className="text-sm text-gray-400 dark:text-gray-400">{t.settings.emailNotificationsDesc}</p>
+                      <p className="font-medium text-text-primary">{t.settings.emailNotifications}</p>
+                      <p className="text-sm text-text-secondary">{t.settings.emailNotificationsDesc}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -360,14 +360,14 @@ export const Settings = () => {
                         ...notificationSettings, 
                         emailNotifications: e.target.checked 
                       })}
-                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-cyber-500 focus:ring-cyber-500 cursor-pointer"
+                      className="w-5 h-5 rounded bg-bg-tertiary border-border-primary text-cyber-500 focus:ring-cyber-500 cursor-pointer"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-gray-800 dark:border-gray-800">
+                  <div className="flex items-center justify-between py-3 border-b border-border-primary">
                     <div>
-                      <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.caseUpdates}</p>
-                      <p className="text-sm text-gray-400 dark:text-gray-400">{t.settings.caseUpdatesDesc}</p>
+                      <p className="font-medium text-text-primary">{t.settings.caseUpdates}</p>
+                      <p className="text-sm text-text-secondary">{t.settings.caseUpdatesDesc}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -376,14 +376,14 @@ export const Settings = () => {
                         ...notificationSettings, 
                         caseUpdates: e.target.checked 
                       })}
-                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-cyber-500 focus:ring-cyber-500 cursor-pointer"
+                      className="w-5 h-5 rounded bg-bg-tertiary border-border-primary text-cyber-500 focus:ring-cyber-500 cursor-pointer"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-gray-800 dark:border-gray-800">
+                  <div className="flex items-center justify-between py-3 border-b border-border-primary">
                     <div>
-                      <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.evidenceUploads}</p>
-                      <p className="text-sm text-gray-400 dark:text-gray-400">{t.settings.evidenceUploadsDesc}</p>
+                      <p className="font-medium text-text-primary">{t.settings.evidenceUploads}</p>
+                      <p className="text-sm text-text-secondary">{t.settings.evidenceUploadsDesc}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -392,14 +392,14 @@ export const Settings = () => {
                         ...notificationSettings, 
                         evidenceUploads: e.target.checked 
                       })}
-                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-cyber-500 focus:ring-cyber-500 cursor-pointer"
+                      className="w-5 h-5 rounded bg-bg-tertiary border-border-primary text-cyber-500 focus:ring-cyber-500 cursor-pointer"
                     />
                   </div>
 
                   <div className="flex items-center justify-between py-3">
                     <div>
-                      <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.securityAlerts}</p>
-                      <p className="text-sm text-gray-400 dark:text-gray-400">{t.settings.securityAlertsDesc}</p>
+                      <p className="font-medium text-text-primary">{t.settings.securityAlerts}</p>
+                      <p className="text-sm text-text-secondary">{t.settings.securityAlertsDesc}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -408,7 +408,7 @@ export const Settings = () => {
                         ...notificationSettings, 
                         securityAlerts: e.target.checked 
                       })}
-                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-cyber-500 focus:ring-cyber-500 cursor-pointer"
+                      className="w-5 h-5 rounded bg-bg-tertiary border-border-primary text-cyber-500 focus:ring-cyber-500 cursor-pointer"
                     />
                   </div>
 
@@ -430,22 +430,22 @@ export const Settings = () => {
               <CardContent className="space-y-6">
                 {/* Theme Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-primary mb-2">
                     {t.settings.theme}
                   </label>
-                  <p className="text-sm text-gray-400 dark:text-gray-400 mb-3">{t.settings.themeDesc}</p>
+                  <p className="text-sm text-text-secondary mb-3">{t.settings.themeDesc}</p>
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       onClick={() => handleThemeChange('light')}
                       className={`p-4 rounded-lg border-2 transition-all ${
                         theme === 'light'
                           ? 'border-cyber-500 bg-cyber-500/10'
-                          : 'border-gray-700 dark:border-gray-700 hover:border-gray-600'
+                          : 'border-border-primary hover:border-border-secondary'
                       }`}
                     >
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-full h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded" />
-                        <span className="text-sm font-medium text-gray-200 dark:text-gray-200">
+                        <span className="text-sm font-medium text-text-primary">
                           {t.settings.lightTheme}
                         </span>
                       </div>
@@ -456,12 +456,12 @@ export const Settings = () => {
                       className={`p-4 rounded-lg border-2 transition-all ${
                         theme === 'dark'
                           ? 'border-cyber-500 bg-cyber-500/10'
-                          : 'border-gray-700 dark:border-gray-700 hover:border-gray-600'
+                          : 'border-border-primary hover:border-border-secondary'
                       }`}
                     >
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-full h-20 bg-gradient-to-br from-gray-900 to-gray-950 rounded" />
-                        <span className="text-sm font-medium text-gray-200 dark:text-gray-200">
+                        <span className="text-sm font-medium text-text-primary">
                           {t.settings.darkTheme}
                         </span>
                       </div>
@@ -471,24 +471,24 @@ export const Settings = () => {
 
                 {/* Language Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-primary mb-2">
                     {t.settings.language}
                   </label>
-                  <p className="text-sm text-gray-400 dark:text-gray-400 mb-3">{t.settings.languageDesc}</p>
+                  <p className="text-sm text-text-secondary mb-3">{t.settings.languageDesc}</p>
                   <div className="space-y-2">
                     <button
                       onClick={() => handleLanguageChange('en')}
                       className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                         language === 'en'
                           ? 'border-cyber-500 bg-cyber-500/10'
-                          : 'border-gray-700 dark:border-gray-700 hover:border-gray-600'
+                          : 'border-border-primary hover:border-border-secondary'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">🇬🇧</span>
                         <div>
-                          <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.english}</p>
-                          <p className="text-sm text-gray-400 dark:text-gray-400">English</p>
+                          <p className="font-medium text-text-primary">{t.settings.english}</p>
+                          <p className="text-sm text-text-secondary">English</p>
                         </div>
                       </div>
                     </button>
@@ -498,14 +498,14 @@ export const Settings = () => {
                       className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                         language === 'ru'
                           ? 'border-cyber-500 bg-cyber-500/10'
-                          : 'border-gray-700 dark:border-gray-700 hover:border-gray-600'
+                          : 'border-border-primary hover:border-border-secondary'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">🇷🇺</span>
                         <div>
-                          <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.russian}</p>
-                          <p className="text-sm text-gray-400 dark:text-gray-400">Русский</p>
+                          <p className="font-medium text-text-primary">{t.settings.russian}</p>
+                          <p className="text-sm text-text-secondary">Русский</p>
                         </div>
                       </div>
                     </button>
@@ -515,14 +515,14 @@ export const Settings = () => {
                       className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                         language === 'tk'
                           ? 'border-cyber-500 bg-cyber-500/10'
-                          : 'border-gray-700 dark:border-gray-700 hover:border-gray-600'
+                          : 'border-border-primary hover:border-border-secondary'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">🇹🇲</span>
                         <div>
-                          <p className="font-medium text-gray-200 dark:text-gray-200">{t.settings.turkmen}</p>
-                          <p className="text-sm text-gray-400 dark:text-gray-400">Türkmençe</p>
+                          <p className="font-medium text-text-primary">{t.settings.turkmen}</p>
+                          <p className="text-sm text-text-secondary">Türkmençe</p>
                         </div>
                       </div>
                     </button>

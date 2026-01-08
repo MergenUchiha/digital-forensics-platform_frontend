@@ -32,7 +32,6 @@ const typeIcons: Record<string, string> = {
 export const EvidenceCard = ({ evidence }: EvidenceCardProps) => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   
-  // Безопасное получение данных с fallback значениями
   const sha256 = evidence.sha256Hash || evidence.hash?.sha256 || 'N/A';
   const md5 = evidence.md5Hash || evidence.hash?.md5 || 'N/A';
   const size = evidence.fileSize || evidence.size || 0;
@@ -40,7 +39,6 @@ export const EvidenceCard = ({ evidence }: EvidenceCardProps) => {
   const type = evidence.type?.toUpperCase() || 'FILE';
 
   const handleDownload = () => {
-    // Создаем реальный файл для скачивания
     const fileContent = `Evidence File: ${evidence.name}
 Type: ${type}
 Description: ${evidence.description || 'No description'}
@@ -53,26 +51,16 @@ Uploaded By: ${evidence.uploadedBy?.name || 'Unknown'}
 This is a simulated evidence file for the Digital Forensics Platform.
 In a real system, this would contain the actual evidence data.`;
 
-    // Создаем blob из содержимого
     const blob = new Blob([fileContent], { type: 'text/plain' });
-    
-    // Создаем URL для blob
     const url = window.URL.createObjectURL(blob);
-    
-    // Создаем временную ссылку для скачивания
     const link = document.createElement('a');
     link.href = url;
     link.download = evidence.name || 'evidence.txt';
-    
-    // Добавляем в DOM, кликаем и удаляем
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
-    // Освобождаем URL
     window.URL.revokeObjectURL(url);
 
-    // Показываем уведомление
     (window as any).showNotification?.({
       type: 'success',
       title: 'Download Complete',
@@ -89,10 +77,10 @@ In a real system, this would contain the actual evidence data.`;
             <div className="flex items-start gap-3 flex-1 min-w-0">
               <div className="text-3xl">{typeIcons[type] || '📄'}</div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-semibold text-gray-100 truncate">
+                <h3 className="text-base font-semibold text-text-primary truncate">
                   {evidence.name}
                 </h3>
-                <p className="text-sm text-gray-400 mt-1 line-clamp-2">
+                <p className="text-sm text-text-secondary mt-1 line-clamp-2">
                   {evidence.description || 'No description'}
                 </p>
               </div>
@@ -105,17 +93,17 @@ In a real system, this would contain the actual evidence data.`;
           {/* Metadata */}
           <div className="space-y-2 text-sm">
             {sha256 !== 'N/A' && (
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 text-text-tertiary">
                 <Hash className="w-4 h-4 flex-shrink-0" />
                 <span className="font-mono text-xs truncate">{truncateHash(sha256)}</span>
               </div>
             )}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 text-text-tertiary">
                 <FileText className="w-4 h-4" />
                 <span>{formatBytes(size)}</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 text-text-tertiary">
                 <Clock className="w-4 h-4" />
                 <span className="text-xs">{formatDate(uploadedAt)}</span>
               </div>
@@ -124,13 +112,13 @@ In a real system, this would contain the actual evidence data.`;
 
           {/* Chain of Custody */}
           {evidence.chainOfCustody && evidence.chainOfCustody.length > 0 && (
-            <div className="pt-4 border-t border-gray-800">
-              <p className="text-xs text-gray-500 mb-2">Chain of Custody</p>
+            <div className="pt-4 border-t border-border-primary">
+              <p className="text-xs text-text-muted mb-2">Chain of Custody</p>
               <div className="space-y-2">
                 {evidence.chainOfCustody.slice(0, 2).map((entry) => (
                   <div key={entry.id} className="flex items-center gap-2 text-xs">
-                    <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
-                    <span className="text-gray-400 truncate">
+                    <div className="w-2 h-2 bg-status-success rounded-full flex-shrink-0" />
+                    <span className="text-text-tertiary truncate">
                       {entry.action.replace('_', ' ')} by {entry.performedBy?.name || 'Unknown'}
                     </span>
                   </div>
@@ -140,7 +128,7 @@ In a real system, this would contain the actual evidence data.`;
           )}
 
           {/* Actions */}
-          <div className="flex gap-2 pt-4 border-t border-gray-800">
+          <div className="flex gap-2 pt-4 border-t border-border-primary">
             <Button 
               variant="secondary" 
               size="sm" 
@@ -172,27 +160,27 @@ In a real system, this would contain the actual evidence data.`;
         <div className="space-y-6">
           {/* Basic Info */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-100 mb-4">
+            <h3 className="text-lg font-semibold text-text-primary mb-4">
               {evidence.name}
             </h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-gray-500 mb-1">Type</p>
+                <p className="text-text-muted mb-1">Type</p>
                 <Badge variant={typeColors[type] || 'info'}>
                   {type.replace('_', ' ')}
                 </Badge>
               </div>
               <div>
-                <p className="text-gray-500 mb-1">Size</p>
-                <p className="text-gray-200">{formatBytes(size)}</p>
+                <p className="text-text-muted mb-1">Size</p>
+                <p className="text-text-primary">{formatBytes(size)}</p>
               </div>
               <div>
-                <p className="text-gray-500 mb-1">Uploaded</p>
-                <p className="text-gray-200">{formatDate(uploadedAt)}</p>
+                <p className="text-text-muted mb-1">Uploaded</p>
+                <p className="text-text-primary">{formatDate(uploadedAt)}</p>
               </div>
               <div>
-                <p className="text-gray-500 mb-1">Uploaded By</p>
-                <p className="text-gray-200">{evidence.uploadedBy?.name || 'Unknown'}</p>
+                <p className="text-text-muted mb-1">Uploaded By</p>
+                <p className="text-text-primary">{evidence.uploadedBy?.name || 'Unknown'}</p>
               </div>
             </div>
           </div>
@@ -200,25 +188,25 @@ In a real system, this would contain the actual evidence data.`;
           {/* Description */}
           {evidence.description && (
             <div>
-              <p className="text-gray-500 mb-2">Description</p>
-              <p className="text-gray-200">{evidence.description}</p>
+              <p className="text-text-muted mb-2">Description</p>
+              <p className="text-text-primary">{evidence.description}</p>
             </div>
           )}
 
           {/* Hashes */}
           <div>
-            <p className="text-gray-500 mb-2">File Hashes</p>
+            <p className="text-text-muted mb-2">File Hashes</p>
             <div className="space-y-2 font-mono text-xs">
               {sha256 !== 'N/A' && (
-                <div className="p-2 bg-gray-900 rounded">
-                  <span className="text-gray-500">SHA-256:</span>
-                  <p className="text-gray-200 break-all mt-1">{sha256}</p>
+                <div className="p-2 bg-bg-tertiary rounded">
+                  <span className="text-text-muted">SHA-256:</span>
+                  <p className="text-text-primary break-all mt-1">{sha256}</p>
                 </div>
               )}
               {md5 !== 'N/A' && (
-                <div className="p-2 bg-gray-900 rounded">
-                  <span className="text-gray-500">MD5:</span>
-                  <p className="text-gray-200 break-all mt-1">{md5}</p>
+                <div className="p-2 bg-bg-tertiary rounded">
+                  <span className="text-text-muted">MD5:</span>
+                  <p className="text-text-primary break-all mt-1">{md5}</p>
                 </div>
               )}
             </div>
@@ -227,26 +215,26 @@ In a real system, this would contain the actual evidence data.`;
           {/* Chain of Custody */}
           {evidence.chainOfCustody && evidence.chainOfCustody.length > 0 && (
             <div>
-              <p className="text-gray-500 mb-3">Chain of Custody</p>
+              <p className="text-text-muted mb-3">Chain of Custody</p>
               <div className="space-y-3">
                 {evidence.chainOfCustody.map((entry) => (
                   <div 
                     key={entry.id} 
-                    className="p-3 bg-gray-900 rounded-lg border border-gray-800"
+                    className="p-3 bg-bg-tertiary rounded-lg border border-border-primary"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-200">
+                      <span className="text-sm font-medium text-text-primary">
                         {entry.action.replace('_', ' ')}
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-text-muted">
                         {formatDate(entry.timestamp)}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-text-secondary">
                       By {entry.performedBy?.name || 'Unknown'}
                     </p>
                     {entry.notes && (
-                      <p className="text-xs text-gray-500 mt-2">{entry.notes}</p>
+                      <p className="text-xs text-text-muted mt-2">{entry.notes}</p>
                     )}
                   </div>
                 ))}
@@ -257,15 +245,15 @@ In a real system, this would contain the actual evidence data.`;
           {/* Metadata */}
           {evidence.metadata && Object.keys(evidence.metadata).length > 0 && (
             <div>
-              <p className="text-gray-500 mb-2">Metadata</p>
-              <pre className="p-4 bg-gray-900 rounded text-xs text-gray-400 overflow-x-auto">
+              <p className="text-text-muted mb-2">Metadata</p>
+              <pre className="p-4 bg-bg-tertiary rounded text-xs text-text-secondary overflow-x-auto">
                 {JSON.stringify(evidence.metadata, null, 2)}
               </pre>
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4 border-t border-gray-800">
+          <div className="flex gap-3 pt-4 border-t border-border-primary">
             <Button 
               variant="primary" 
               className="flex-1 gap-2"

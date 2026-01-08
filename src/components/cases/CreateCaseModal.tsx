@@ -40,10 +40,8 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
     setIsSubmitting(true);
     
     try {
-      // Отправляем данные напрямую в правильном формате
       await onSubmit(formData);
       
-      // Reset form
       setFormData({
         title: '',
         description: '',
@@ -82,7 +80,7 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-text-primary mb-2">
             Case Title *
           </label>
           <Input
@@ -96,7 +94,7 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-text-primary mb-2">
             Description *
           </label>
           <textarea
@@ -105,20 +103,20 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
             placeholder="Describe the incident..."
             rows={4}
             required
-            className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent transition-all duration-200"
+            className="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent transition-all duration-200"
           />
         </div>
 
         {/* Severity & Status */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               Severity *
             </label>
             <select
               value={formData.severity}
               onChange={(e) => setFormData({ ...formData, severity: e.target.value })}
-              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent transition-all duration-200"
+              className="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent transition-all duration-200"
             >
               <option value="LOW">Low</option>
               <option value="MEDIUM">Medium</option>
@@ -128,13 +126,13 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               Status *
             </label>
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent transition-all duration-200"
+              className="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent transition-all duration-200"
             >
               <option value="OPEN">Open</option>
               <option value="IN_PROGRESS">In Progress</option>
@@ -147,7 +145,7 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
         {/* Location */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               City
             </label>
             <Input
@@ -166,7 +164,7 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               Country
             </label>
             <Input
@@ -186,7 +184,7 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
 
         {/* Tags */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-text-primary mb-2">
             Tags
           </label>
           <div className="flex gap-2 mb-2">
@@ -211,13 +209,13 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
             {formData.tags?.map(tag => (
               <span
                 key={tag}
-                className="px-3 py-1 bg-gray-800 text-gray-300 text-sm rounded-full flex items-center gap-2"
+                className="px-3 py-1 bg-bg-tertiary text-text-secondary text-sm rounded-full flex items-center gap-2 border border-border-primary"
               >
                 #{tag}
                 <button
                   type="button"
                   onClick={() => removeTag(tag)}
-                  className="text-gray-500 hover:text-gray-300"
+                  className="text-text-muted hover:text-text-primary"
                 >
                   ×
                 </button>
@@ -227,7 +225,7 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 pt-4 border-t border-gray-800">
+        <div className="flex gap-3 pt-4 border-t border-border-primary">
           <Button 
             type="submit" 
             variant="primary" 
