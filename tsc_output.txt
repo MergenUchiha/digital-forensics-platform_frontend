@@ -1,0 +1,7 @@
+src/App.tsx(19,20): error TS6133: 'lazy' is declared but its value is never read.
+src/components/ui/Notification.tsx(37,27): error TS2503: Cannot find namespace 'NodeJS'.
+src/services/api.ts(103,39): error TS18046: 'data' is of type 'unknown'.
+src/services/api.ts(108,39): error TS18046: 'data' is of type 'unknown'.
+src/services/api.ts(113,32): error TS18046: 'data' is of type 'unknown'.
+src/services/api.ts(116,11): error TS18046: 'data' is of type 'unknown'.
+src/services/api.ts(136,26): error TS18046: 'data' is of type 'unknown'.
