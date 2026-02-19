@@ -72,12 +72,12 @@ export const Dashboard = () => {
           </div>
           
           {/* Кнопка для скрытия тестового компонента */}
-          <button
+          {/* <button
             onClick={() => setShowThemeTest(!showThemeTest)}
             className="px-3 py-1 text-xs bg-bg-tertiary hover:bg-bg-hover text-text-primary rounded border border-border-primary"
           >
             {showThemeTest ? 'Hide' : 'Show'} Theme Test
-          </button>
+          </button> */}
         </div>
 
         {/* Stats Grid */}
@@ -109,7 +109,7 @@ export const Dashboard = () => {
         </div>
 
         {/* World Map */}
-        <WorldMap cases={cases} />
+        {/* <WorldMap cases={cases} /> */}
 
         {/* Charts and Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

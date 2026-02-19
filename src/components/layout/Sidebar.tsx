@@ -24,7 +24,7 @@ export const Sidebar = () => {
     { icon: FolderOpen, label: t.nav.cases, path: '/cases' },
     { icon: Database, label: t.nav.evidence, path: '/evidence' },
     { icon: Clock, label: t.nav.timeline, path: '/timeline' },
-    { icon: Network, label: t.nav.network, path: '/network' },
+    // { icon: Network, label: t.nav.network, path: '/network' },
     { icon: FileText, label: t.nav.reports, path: '/reports' },
     { icon: Settings, label: t.nav.settings, path: '/settings' },
   ];
