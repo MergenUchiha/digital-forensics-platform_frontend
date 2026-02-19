@@ -51,7 +51,7 @@ export const Settings = () => {
   const tabs = [
     { id: 'profile' as const, label: t.settings.profile, icon: User },
     { id: 'security' as const, label: t.settings.security, icon: Lock },
-    { id: 'notifications' as const, label: t.settings.notifications, icon: Bell },
+    // { id: 'notifications' as const, label: t.settings.notifications, icon: Bell },
     { id: 'appearance' as const, label: t.settings.appearance, icon: Palette },
   ];
 
