@@ -25,8 +25,8 @@ export const tk = {
   },
 
   app: {
-    title: 'ForensicsLab',
-    subtitle: 'Sanly subutnamalar platformasy',
+    title: 'Sanly kriminalistika platformasy',
+    subtitle: 'Bulut tehnologiýalary we IoT enjamlary üçin',
   },
 
   nav: {

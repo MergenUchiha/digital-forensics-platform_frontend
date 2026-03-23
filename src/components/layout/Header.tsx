@@ -43,7 +43,7 @@ export const Header = () => {
       setNotifications([
         {
           id: '1',
-          title: 'Welcome to ForensicsLab',
+          title: 'Welcome to Digital Forensics Platform for Cloud and IoT',
           message: 'Start by creating your first case',
           createdAt: new Date().toISOString(),
           read: false,
