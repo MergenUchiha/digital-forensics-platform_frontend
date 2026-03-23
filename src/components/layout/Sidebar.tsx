@@ -8,10 +8,10 @@ import {
     Clock,
     FileText,
     Settings,
-    Shield,
     LogOut,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
+import logo from "@/assets/logo.png";
 
 export const Sidebar = () => {
     const location = useLocation();
@@ -23,7 +23,6 @@ export const Sidebar = () => {
         { icon: FolderOpen, label: t.nav.cases, path: "/cases" },
         { icon: Database, label: t.nav.evidence, path: "/evidence" },
         { icon: Clock, label: t.nav.timeline, path: "/timeline" },
-        // { icon: Network, label: t.nav.network, path: '/network' },
         { icon: FileText, label: t.nav.reports, path: "/reports" },
         { icon: Settings, label: t.nav.settings, path: "/settings" },
     ];
@@ -33,9 +32,11 @@ export const Sidebar = () => {
             {/* Logo */}
             <div className="p-6 border-b border-border-primary">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-cyber-400 to-cyber-600 rounded-lg flex items-center justify-center">
-                        <Shield className="w-6 h-6 text-white" />
-                    </div>
+                    <img
+                        src={logo}
+                        alt="Logo"
+                        className="w-10 h-10 object-contain"
+                    />
                     <div>
                         <h1 className="text-lg font-bold text-text-primary">
                             {t.app.title}

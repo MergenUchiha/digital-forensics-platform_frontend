@@ -25,8 +25,8 @@ export const en = {
   },
 
   app: {
-    title: 'ForensicsLab',
-    subtitle: 'Digital Evidence Platform',
+    title: 'Digital Forensics Platform',
+    subtitle: 'for Cloud and IoT',
   },
 
   nav: {
