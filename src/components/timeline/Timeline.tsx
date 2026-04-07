@@ -1,9 +1,9 @@
-import { TimelineEvent } from '@/types';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { formatDate } from '@/utils/format';
-import { Shield, Network, FileText, Bell, Lock, Activity } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { TimelineEvent } from "@/types";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { formatDate } from "@/utils/format";
+import { Shield, Network, FileText, Bell, Lock, Activity } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface TimelineProps {
   events: TimelineEvent[];
@@ -24,30 +24,30 @@ const eventIcons: Record<string, any> = {
   alert: Bell,
 };
 
-const severityVariants: Record<string, 'info' | 'warning' | 'danger'> = {
-  LOW: 'info',
-  low: 'info',
-  MEDIUM: 'info',
-  medium: 'info',
-  HIGH: 'warning',
-  high: 'warning',
-  CRITICAL: 'danger',
-  critical: 'danger',
-  INFO: 'info',
-  info: 'info',
-  WARNING: 'warning',
-  warning: 'warning',
+const severityVariants: Record<string, "info" | "warning" | "danger"> = {
+  LOW: "info",
+  low: "info",
+  MEDIUM: "info",
+  medium: "info",
+  HIGH: "warning",
+  high: "warning",
+  CRITICAL: "danger",
+  critical: "danger",
+  INFO: "info",
+  info: "info",
+  WARNING: "warning",
+  warning: "warning",
 };
 
 export const Timeline = ({ events }: TimelineProps) => {
   return (
     <div className="space-y-4">
       {events.map((event, index) => {
-        const eventType = (event.type || 'SYSTEM').toString();
+        const eventType = (event.type || "SYSTEM").toString();
         const Icon = eventIcons[eventType] || Activity;
-        const severity = (event.severity || 'INFO').toString();
-        const variant = severityVariants[severity] || 'info';
-        
+        const severity = (event.severity || "INFO").toString();
+        const variant = severityVariants[severity] || "info";
+
         return (
           <motion.div
             key={event.id}
@@ -64,13 +64,18 @@ export const Timeline = ({ events }: TimelineProps) => {
             <div className="flex gap-4">
               {/* Icon */}
               <div className="relative z-10">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  severity === 'CRITICAL' || severity === 'critical'
-                    ? 'bg-red-500/10 text-red-400' 
-                    : severity === 'HIGH' || severity === 'high' || severity === 'WARNING' || severity === 'warning'
-                    ? 'bg-yellow-500/10 text-yellow-400'
-                    : 'bg-blue-500/10 text-blue-400'
-                }`}>
+                <div
+                  className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                    severity === "CRITICAL" || severity === "critical"
+                      ? "bg-red-500/10 text-red-400"
+                      : severity === "HIGH" ||
+                          severity === "high" ||
+                          severity === "WARNING" ||
+                          severity === "warning"
+                        ? "bg-yellow-500/10 text-yellow-400"
+                        : "bg-blue-500/10 text-blue-400"
+                  }`}
+                >
                   <Icon className="w-6 h-6" />
                 </div>
               </div>
@@ -88,7 +93,9 @@ export const Timeline = ({ events }: TimelineProps) => {
                           {severity.toUpperCase()}
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-400">{event.description}</p>
+                      <p className="text-sm text-gray-400">
+                        {event.description}
+                      </p>
                     </div>
                   </div>
 
@@ -99,9 +106,10 @@ export const Timeline = ({ events }: TimelineProps) => {
                     {event.ipAddresses && event.ipAddresses.length > 0 && (
                       <span>🌐 {event.ipAddresses[0]}</span>
                     )}
-                    {event.relatedEntities?.ipAddresses && event.relatedEntities.ipAddresses.length > 0 && (
-                      <span>🌐 {event.relatedEntities.ipAddresses[0]}</span>
-                    )}
+                    {event.relatedEntities?.ipAddresses &&
+                      event.relatedEntities.ipAddresses.length > 0 && (
+                        <span>🌐 {event.relatedEntities.ipAddresses[0]}</span>
+                      )}
                   </div>
 
                   {/* Additional metadata if available */}

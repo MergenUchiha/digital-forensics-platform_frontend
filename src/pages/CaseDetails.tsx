@@ -1,71 +1,68 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
-import { Input } from '@/components/ui/Input';
-import { Timeline } from '@/components/timeline/Timeline';
-import { EvidenceCard } from '@/components/evidence/EvidenceCard';
-import { Case, EvidenceItem, TimelineEvent } from '@/types';
-import { formatDate, formatRelativeTime, getStatusColor } from '@/utils/format';
-import { exportCaseToPDF } from '@/utils/pdfExport';
-import { 
-  ArrowLeft, 
-  MapPin, 
-  Activity, 
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
+import { Input } from "@/components/ui/Input";
+import { Timeline } from "@/components/timeline/Timeline";
+import { EvidenceCard } from "@/components/evidence/EvidenceCard";
+import { Case, EvidenceItem, TimelineEvent } from "@/types";
+import { formatDate, formatRelativeTime, getStatusColor } from "@/utils/format";
+import { exportCaseToPDF } from "@/utils/pdfExport";
+import {
+  ArrowLeft,
+  MapPin,
+  Activity,
   Shield,
   AlertTriangle,
   Clock,
   Edit,
   Download,
   Share2,
-  Database
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { casesService } from '@/services/cases.service';
-import { evidenceService } from '@/services/evidence.service';
-import { timelineService } from '@/services/timeline.service';
+  Database,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { casesService } from "@/services/cases.service";
+import { evidenceService } from "@/services/evidence.service";
+import { timelineService } from "@/services/timeline.service";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const CaseDetails = () => {
+  const { t } = useLanguage();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'overview' | 'evidence' | 'timeline' | 'analysis'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "evidence" | "timeline" | "analysis"
+  >("overview");
   const [caseData, setCaseData] = useState<Case | null>(null);
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({
-    title: '',
-    description: '',
-    severity: 'MEDIUM',
-    status: 'OPEN',
+    title: "",
+    description: "",
+    severity: "MEDIUM",
+    status: "OPEN",
   });
 
   useEffect(() => {
-    if (id) {
-      fetchCaseData(id);
-    }
+    if (id) fetchCaseData(id);
   }, [id]);
 
   const fetchCaseData = async (caseId: string) => {
     try {
       setIsLoading(true);
-      console.log('Fetching case data for ID:', caseId);
-      
-      const [caseResponse, evidenceResponse, eventsResponse] = await Promise.all([
-        casesService.getById(caseId),
-        evidenceService.getAll(caseId),
-        timelineService.getAll(caseId),
-      ]);
-
-      console.log('Case data received:', caseResponse);
+      const [caseResponse, evidenceResponse, eventsResponse] =
+        await Promise.all([
+          casesService.getById(caseId),
+          evidenceService.getAll(caseId),
+          timelineService.getAll(caseId),
+        ]);
       setCaseData(caseResponse);
       setEvidence(evidenceResponse);
       setEvents(eventsResponse);
-      
-      // Set edit form data с правильным форматом
       setEditFormData({
         title: caseResponse.title,
         description: caseResponse.description,
@@ -73,19 +70,10 @@ export const CaseDetails = () => {
         status: caseResponse.status.toString().toUpperCase(),
       });
     } catch (error: any) {
-      console.error('Failed to fetch case data:', error);
-      
-      let errorMessage = 'Failed to load case details';
-      if (error.response?.status === 404) {
-        errorMessage = 'Case not found';
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      }
-      
       (window as any).showNotification?.({
-        type: 'error',
-        title: 'Error',
-        message: errorMessage,
+        type: "error",
+        title: t.common.error,
+        message: t.caseDetails.caseNotFoundMsg,
       });
     } finally {
       setIsLoading(false);
@@ -95,124 +83,61 @@ export const CaseDetails = () => {
   const handleEditCase = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id || !caseData) return;
-
     try {
-      // Формируем данные для обновления - отправляем только измененные поля
       const updateData: any = {};
-      
-      console.log('Current case data:', {
-        title: caseData.title,
-        description: caseData.description,
-        severity: caseData.severity,
-        status: caseData.status,
-      });
-      
-      console.log('Form data:', editFormData);
-      
-      if (editFormData.title !== caseData.title) {
+      if (editFormData.title !== caseData.title)
         updateData.title = editFormData.title;
-        console.log('Title changed:', editFormData.title);
-      }
-      if (editFormData.description !== caseData.description) {
+      if (editFormData.description !== caseData.description)
         updateData.description = editFormData.description;
-        console.log('Description changed');
-      }
-      if (editFormData.severity.toUpperCase() !== caseData.severity.toString().toUpperCase()) {
+      if (
+        editFormData.severity.toUpperCase() !==
+        caseData.severity.toString().toUpperCase()
+      )
         updateData.severity = editFormData.severity.toUpperCase();
-        console.log('Severity changed:', editFormData.severity.toUpperCase());
-      }
-      if (editFormData.status.toUpperCase() !== caseData.status.toString().toUpperCase()) {
+      if (
+        editFormData.status.toUpperCase() !==
+        caseData.status.toString().toUpperCase()
+      )
         updateData.status = editFormData.status.toUpperCase();
-        console.log('Status changed:', editFormData.status.toUpperCase());
-      }
 
-      // Если нет изменений
       if (Object.keys(updateData).length === 0) {
         (window as any).showNotification?.({
-          type: 'info',
-          title: 'No Changes',
-          message: 'No changes were made to the case',
+          type: "info",
+          title: t.caseDetails.noChanges,
+          message: t.caseDetails.noChangesMsg,
         });
         setIsEditModalOpen(false);
         return;
       }
-
-      console.log('📤 Sending update request with data:', JSON.stringify(updateData, null, 2));
-      
-      const response = await casesService.update(id, updateData);
-      console.log('✅ Update response:', response);
-      
+      await casesService.update(id, updateData);
       await fetchCaseData(id);
       setIsEditModalOpen(false);
-      
       (window as any).showNotification?.({
-        type: 'success',
-        title: 'Case Updated',
-        message: 'Case has been successfully updated',
+        type: "success",
+        title: t.caseDetails.caseUpdated,
+        message: t.caseDetails.caseUpdatedMsg,
       });
     } catch (error: any) {
-      console.error('❌ Failed to update case:', error);
-      console.error('Error response:', error.response?.data);
-      
-      let errorMessage = 'Failed to update case';
-      let errorDetails = '';
-      
-      if (error.response?.status === 400) {
-        const data = error.response.data;
-        console.log('400 error data:', data);
-        
-        if (data?.errors && Array.isArray(data.errors)) {
-          errorDetails = data.errors
-            .map((e: any) => `${e.field}: ${e.message}`)
-            .join('\n');
-          errorMessage = 'Validation errors:\n' + errorDetails;
-        } else if (data?.message) {
-          errorMessage = data.message;
-          if (data.errors) {
-            errorDetails = JSON.stringify(data.errors, null, 2);
-          }
-        } else {
-          errorMessage = 'Invalid data provided. Please check all fields.';
-          errorDetails = JSON.stringify(data, null, 2);
-        }
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      console.error('Error message:', errorMessage);
-      if (errorDetails) {
-        console.error('Error details:', errorDetails);
-      }
-      
+      const errorMessage =
+        error.response?.data?.message || t.messages.operationFailed;
       (window as any).showNotification?.({
-        type: 'error',
-        title: 'Update Failed',
+        type: "error",
+        title: t.caseDetails.updateFailed,
         message: errorMessage,
       });
     }
   };
 
   const handleExportPDF = () => {
-    if (caseData) {
-      exportCaseToPDF(caseData, evidence, events);
-    }
+    if (caseData) exportCaseToPDF(caseData, evidence, events);
   };
 
   const handleShare = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
       (window as any).showNotification?.({
-        type: 'success',
-        title: 'Link Copied',
-        message: 'Case link has been copied to clipboard',
-      });
-    }).catch(() => {
-      (window as any).showNotification?.({
-        type: 'error',
-        title: 'Error',
-        message: 'Failed to copy link',
+        type: "success",
+        title: t.caseDetails.linkCopied,
+        message: t.caseDetails.linkCopiedMsg,
       });
     });
   };
@@ -222,7 +147,7 @@ export const CaseDetails = () => {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-cyber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading case details...</p>
+          <p className="text-gray-400">{t.caseDetails.loadingCase}</p>
         </div>
       </div>
     );
@@ -233,11 +158,13 @@ export const CaseDetails = () => {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-100 mb-2">Case Not Found</h2>
-          <p className="text-gray-400 mb-4">The case you're looking for doesn't exist.</p>
-          <Button onClick={() => navigate('/cases')}>
+          <h2 className="text-2xl font-bold text-gray-100 mb-2">
+            {t.caseDetails.caseNotFound}
+          </h2>
+          <p className="text-gray-400 mb-4">{t.caseDetails.caseNotFoundMsg}</p>
+          <Button onClick={() => navigate("/cases")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Cases
+            {t.caseDetails.backToCases}
           </Button>
         </div>
       </div>
@@ -245,21 +172,31 @@ export const CaseDetails = () => {
   }
 
   const tabs = [
-    { id: 'overview' as const, label: 'Overview', icon: Shield },
-    { id: 'evidence' as const, label: 'Evidence', icon: Database, badge: evidence.length },
-    { id: 'timeline' as const, label: 'Timeline', icon: Clock, badge: events.length },
-    { id: 'analysis' as const, label: 'Analysis', icon: Activity },
+    { id: "overview" as const, label: t.caseDetails.overview, icon: Shield },
+    {
+      id: "evidence" as const,
+      label: t.caseDetails.evidence,
+      icon: Database,
+      badge: evidence.length,
+    },
+    {
+      id: "timeline" as const,
+      label: t.caseDetails.timeline,
+      icon: Clock,
+      badge: events.length,
+    },
+    { id: "analysis" as const, label: t.caseDetails.analysis, icon: Activity },
   ];
 
   const severityColors: any = {
-    critical: 'danger',
-    high: 'warning',
-    medium: 'info',
-    low: 'success',
-    CRITICAL: 'danger',
-    HIGH: 'warning',
-    MEDIUM: 'info',
-    LOW: 'success',
+    critical: "danger",
+    high: "warning",
+    medium: "info",
+    low: "success",
+    CRITICAL: "danger",
+    HIGH: "warning",
+    MEDIUM: "info",
+    LOW: "success",
   };
 
   const severity = caseData.severity.toString().toLowerCase();
@@ -267,19 +204,17 @@ export const CaseDetails = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/cases')}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/cases")}
             className="mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Cases
+            {t.caseDetails.backToCases}
           </Button>
-          
           <div className="flex items-start gap-4">
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-100 mb-2">
@@ -287,40 +222,39 @@ export const CaseDetails = () => {
               </h1>
               <p className="text-gray-400">{caseData.description}</p>
             </div>
-            
             <div className="flex gap-2">
               <Badge variant={severityColors[severity]}>
                 {severity.toUpperCase()}
               </Badge>
-              <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
-                {status.replace('_', ' ').toUpperCase()}
+              <div
+                className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}
+              >
+                {status.replace("_", " ").toUpperCase()}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
       <div className="flex gap-3">
-        <Button variant="primary" className="gap-2" onClick={() => setIsEditModalOpen(true)}>
-          <Edit className="w-4 h-4" />
-          Edit Case
-        </Button>
-        <Button 
-          variant="secondary" 
+        <Button
+          variant="primary"
           className="gap-2"
-          onClick={handleExportPDF}
+          onClick={() => setIsEditModalOpen(true)}
         >
+          <Edit className="w-4 h-4" />
+          {t.caseDetails.editCase}
+        </Button>
+        <Button variant="secondary" className="gap-2" onClick={handleExportPDF}>
           <Download className="w-4 h-4" />
-          Export Report
+          {t.caseDetails.exportReport}
         </Button>
         <Button variant="secondary" className="gap-2" onClick={handleShare}>
           <Share2 className="w-4 h-4" />
-          Share
+          {t.caseDetails.share}
         </Button>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardContent className="flex items-center gap-4">
@@ -328,78 +262,85 @@ export const CaseDetails = () => {
               <Shield className="w-6 h-6 text-blue-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-400">Evidence Collected</p>
-              <p className="text-2xl font-bold text-gray-100">{evidence.length}</p>
+              <p className="text-sm text-gray-400">
+                {t.caseDetails.evidenceCollected}
+              </p>
+              <p className="text-2xl font-bold text-gray-100">
+                {evidence.length}
+              </p>
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="flex items-center gap-4">
             <div className="p-3 bg-purple-500/10 rounded-lg">
               <Activity className="w-6 h-6 text-purple-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-400">Events Logged</p>
-              <p className="text-2xl font-bold text-gray-100">{events.length}</p>
+              <p className="text-sm text-gray-400">
+                {t.caseDetails.eventsLogged}
+              </p>
+              <p className="text-2xl font-bold text-gray-100">
+                {events.length}
+              </p>
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="flex items-center gap-4">
             <div className="p-3 bg-red-500/10 rounded-lg">
               <AlertTriangle className="w-6 h-6 text-red-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-400">Suspicious Activities</p>
+              <p className="text-sm text-gray-400">
+                {t.caseDetails.suspiciousActivities}
+              </p>
               <p className="text-2xl font-bold text-gray-100">
-                {events.filter(e => {
-                  const sev = e.severity.toString().toUpperCase();
-                  return sev === 'CRITICAL' || sev === 'HIGH';
-                }).length}
+                {
+                  events.filter((e) => {
+                    const sev = e.severity.toString().toUpperCase();
+                    return sev === "CRITICAL" || sev === "HIGH";
+                  }).length
+                }
               </p>
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="flex items-center gap-4">
             <div className="p-3 bg-green-500/10 rounded-lg">
               <Clock className="w-6 h-6 text-green-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-400">Time Elapsed</p>
+              <p className="text-sm text-gray-400">
+                {t.caseDetails.timeElapsed}
+              </p>
               <p className="text-2xl font-bold text-gray-100">
-                {Math.floor((Date.now() - new Date(caseData.createdAt).getTime()) / (1000 * 60 * 60))}h
+                {Math.floor(
+                  (Date.now() - new Date(caseData.createdAt).getTime()) /
+                    (1000 * 60 * 60),
+                )}
+                h
               </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Tabs */}
       <div className="border-b border-gray-800">
         <div className="flex gap-1">
-          {tabs.map(tab => {
+          {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`
-                  flex items-center gap-2 px-6 py-3 font-medium transition-all relative
-                  ${isActive 
-                    ? 'text-cyber-400 border-b-2 border-cyber-400' 
-                    : 'text-gray-400 hover:text-gray-200'
-                  }
-                `}
+                className={`flex items-center gap-2 px-6 py-3 font-medium transition-all relative ${isActive ? "text-cyber-400 border-b-2 border-cyber-400" : "text-gray-400 hover:text-gray-200"}`}
               >
                 <Icon className="w-4 h-4" />
                 <span>{tab.label}</span>
-                {'badge' in tab && tab.badge !== undefined && (
+                {"badge" in tab && tab.badge !== undefined && (
                   <span className="px-2 py-0.5 bg-cyan-500/20 text-cyan-400 text-xs rounded-full">
                     {tab.badge}
                   </span>
@@ -410,61 +351,76 @@ export const CaseDetails = () => {
         </div>
       </div>
 
-      {/* Tab Content */}
       <motion.div
         key={activeTab}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        {activeTab === 'overview' && (
+        {activeTab === "overview" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Case Information</CardTitle>
+                  <CardTitle>{t.caseDetails.caseInformation}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Case ID</p>
-                      <p className="text-gray-100 font-mono text-sm">{caseData.id}</p>
+                      <p className="text-sm text-gray-500 mb-1">
+                        {t.caseDetails.caseId}
+                      </p>
+                      <p className="text-gray-100 font-mono text-sm">
+                        {caseData.id}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Created</p>
-                      <p className="text-gray-100">{formatDate(caseData.createdAt)}</p>
+                      <p className="text-sm text-gray-500 mb-1">
+                        {t.caseDetails.created}
+                      </p>
+                      <p className="text-gray-100">
+                        {formatDate(caseData.createdAt)}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Last Updated</p>
-                      <p className="text-gray-100">{formatRelativeTime(caseData.updatedAt)}</p>
+                      <p className="text-sm text-gray-500 mb-1">
+                        {t.caseDetails.lastUpdated}
+                      </p>
+                      <p className="text-gray-100">
+                        {formatRelativeTime(caseData.updatedAt)}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Assigned To</p>
-                      <p className="text-gray-100">{caseData.assignedTo?.name || 'Unassigned'}</p>
+                      <p className="text-sm text-gray-500 mb-1">
+                        {t.caseDetails.assignedTo}
+                      </p>
+                      <p className="text-gray-100">
+                        {caseData.assignedTo?.name || t.caseDetails.unassigned}
+                      </p>
                     </div>
                   </div>
-
-                  {(caseData.location || (caseData.locationCity && caseData.locationCountry)) && (
+                  {(caseData.location ||
+                    (caseData.locationCity && caseData.locationCountry)) && (
                     <div className="pt-4 border-t border-gray-800">
                       <p className="text-sm text-gray-500 mb-2 flex items-center gap-2">
                         <MapPin className="w-4 h-4" />
-                        Location
+                        {t.caseDetails.location}
                       </p>
                       <p className="text-gray-100">
-                        {caseData.location 
+                        {caseData.location
                           ? `${caseData.location.city}, ${caseData.location.country}`
-                          : `${caseData.locationCity}, ${caseData.locationCountry}`
-                        }
+                          : `${caseData.locationCity}, ${caseData.locationCountry}`}
                       </p>
                     </div>
                   )}
-
                   {caseData.tags && caseData.tags.length > 0 && (
                     <div className="pt-4 border-t border-gray-800">
-                      <p className="text-sm text-gray-500 mb-2">Tags</p>
+                      <p className="text-sm text-gray-500 mb-2">
+                        {t.caseDetails.tags}
+                      </p>
                       <div className="flex flex-wrap gap-2">
-                        {caseData.tags.map(tag => (
-                          <span 
+                        {caseData.tags.map((tag) => (
+                          <span
                             key={tag}
                             className="px-3 py-1 bg-gray-800 text-gray-300 text-sm rounded-full"
                           >
@@ -477,31 +433,43 @@ export const CaseDetails = () => {
                 </CardContent>
               </Card>
             </div>
-
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Team</CardTitle>
+                  <CardTitle>{t.caseDetails.team}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
-                      {caseData.createdBy.name.split(' ').map(n => n[0]).join('')}
+                      {caseData.createdBy.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-100">{caseData.createdBy.name}</p>
-                      <p className="text-xs text-gray-500">Case Creator</p>
+                      <p className="text-sm font-medium text-gray-100">
+                        {caseData.createdBy.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {t.caseDetails.caseCreator}
+                      </p>
                     </div>
                   </div>
-                  
                   {caseData.assignedTo && (
                     <div className="flex items-center gap-3 pt-3 border-t border-gray-800">
                       <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        {caseData.assignedTo.name.split(' ').map(n => n[0]).join('')}
+                        {caseData.assignedTo.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-100">{caseData.assignedTo.name}</p>
-                        <p className="text-xs text-gray-500">Assigned Analyst</p>
+                        <p className="text-sm font-medium text-gray-100">
+                          {caseData.assignedTo.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {t.caseDetails.assignedAnalyst}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -511,71 +479,71 @@ export const CaseDetails = () => {
           </div>
         )}
 
-        {activeTab === 'evidence' && (
+        {activeTab === "evidence" && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-100">
-                Evidence Collection ({evidence.length})
-              </h2>
-            </div>
-            
+            <h2 className="text-xl font-semibold text-gray-100">
+              {t.caseDetails.evidenceCollection} ({evidence.length})
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {evidence.map(ev => (
+              {evidence.map((ev) => (
                 <EvidenceCard key={ev.id} evidence={ev} />
               ))}
             </div>
-
             {evidence.length === 0 && (
               <Card>
                 <CardContent className="py-12 text-center">
                   <Shield className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">No evidence collected yet</p>
+                  <p className="text-gray-400">{t.caseDetails.noEvidenceYet}</p>
                 </CardContent>
               </Card>
             )}
           </div>
         )}
 
-        {activeTab === 'timeline' && (
+        {activeTab === "timeline" && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-100">
-                Event Timeline ({events.length})
-              </h2>
-            </div>
-            
+            <h2 className="text-xl font-semibold text-gray-100">
+              {t.caseDetails.eventTimeline} ({events.length})
+            </h2>
             <Timeline events={events} />
-
             {events.length === 0 && (
               <Card>
                 <CardContent className="py-12 text-center">
                   <Clock className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">No events logged yet</p>
+                  <p className="text-gray-400">{t.caseDetails.noEventsYet}</p>
                 </CardContent>
               </Card>
             )}
           </div>
         )}
 
-        {activeTab === 'analysis' && (
+        {activeTab === "analysis" && (
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Threat Analysis</CardTitle>
+                <CardTitle>{t.caseDetails.threatAnalysis}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-                    <h4 className="text-red-400 font-semibold mb-2">Critical Findings</h4>
-                    <ul className="space-y-2 text-sm text-gray-300">
-                      <li>• {events.filter(e => {
-                        const sev = e.severity.toString().toUpperCase();
-                        return sev === 'CRITICAL' || sev === 'HIGH';
-                      }).length} critical/high security events detected</li>
-                      <li>• {evidence.length} pieces of evidence collected</li>
-                      <li>• Investigation ongoing</li>
-                    </ul>
-                  </div>
+                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                  <h4 className="text-red-400 font-semibold mb-2">
+                    {t.caseDetails.criticalFindings}
+                  </h4>
+                  <ul className="space-y-2 text-sm text-gray-300">
+                    <li>
+                      •{" "}
+                      {
+                        events.filter((e) => {
+                          const sev = e.severity.toString().toUpperCase();
+                          return sev === "CRITICAL" || sev === "HIGH";
+                        }).length
+                      }{" "}
+                      {t.caseDetails.suspiciousActivities}
+                    </li>
+                    <li>
+                      • {evidence.length} {t.caseDetails.evidenceCollected}
+                    </li>
+                    <li>• {t.caseDetails.investigationOngoing}</li>
+                  </ul>
                 </div>
               </CardContent>
             </Card>
@@ -583,84 +551,90 @@ export const CaseDetails = () => {
         )}
       </motion.div>
 
-      {/* Edit Modal */}
       <Modal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        title="Edit Case"
+        title={t.caseDetails.editCaseTitle}
         size="lg"
       >
         <form onSubmit={handleEditCase} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Case Title *
+              {t.caseDetails.caseTitle}
             </label>
             <Input
               type="text"
               value={editFormData.title}
-              onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+              onChange={(e) =>
+                setEditFormData({ ...editFormData, title: e.target.value })
+              }
               required
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Description *
+              {t.caseDetails.description}
             </label>
             <textarea
               value={editFormData.description}
-              onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+              onChange={(e) =>
+                setEditFormData({
+                  ...editFormData,
+                  description: e.target.value,
+                })
+              }
               rows={4}
               required
               className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyber-500"
             />
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Severity *
+                {t.caseDetails.severity}
               </label>
               <select
                 value={editFormData.severity}
-                onChange={(e) => setEditFormData({ ...editFormData, severity: e.target.value })}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, severity: e.target.value })
+                }
                 className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
               >
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HIGH">High</option>
-                <option value="CRITICAL">Critical</option>
+                <option value="LOW">{t.severity.low}</option>
+                <option value="MEDIUM">{t.severity.medium}</option>
+                <option value="HIGH">{t.severity.high}</option>
+                <option value="CRITICAL">{t.severity.critical}</option>
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Status *
+                {t.caseDetails.status}
               </label>
               <select
                 value={editFormData.status}
-                onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, status: e.target.value })
+                }
                 className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
               >
-                <option value="OPEN">Open</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="CLOSED">Closed</option>
-                <option value="ARCHIVED">Archived</option>
+                <option value="OPEN">{t.status.open}</option>
+                <option value="IN_PROGRESS">{t.status.in_progress}</option>
+                <option value="CLOSED">{t.status.closed}</option>
+                <option value="ARCHIVED">{t.status.archived}</option>
               </select>
             </div>
           </div>
-
           <div className="flex gap-3 pt-4">
             <Button type="submit" variant="primary" className="flex-1">
-              Save Changes
+              {t.caseDetails.saveChanges}
             </Button>
-            <Button 
-              type="button" 
-              variant="secondary" 
+            <Button
+              type="button"
+              variant="secondary"
               onClick={() => setIsEditModalOpen(false)}
               className="flex-1"
             >
-              Cancel
+              {t.common.cancel}
             </Button>
           </div>
         </form>
