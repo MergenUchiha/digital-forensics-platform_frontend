@@ -29,7 +29,7 @@ import { timelineService } from "@/services/timeline.service";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export const CaseDetails = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<
@@ -387,7 +387,7 @@ export const CaseDetails = () => {
                         {t.caseDetails.lastUpdated}
                       </p>
                       <p className="text-gray-100">
-                        {formatRelativeTime(caseData.updatedAt)}
+                        {formatRelativeTime(caseData.updatedAt, language)}
                       </p>
                     </div>
                     <div>

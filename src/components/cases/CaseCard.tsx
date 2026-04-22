@@ -5,6 +5,7 @@ import { formatRelativeTime, getStatusColor } from '@/utils/format';
 import { MapPin, Database, Activity } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CaseCardProps {
   case: Case;
@@ -19,6 +20,7 @@ const severityColors = {
 
 export const CaseCard = ({ case: c }: CaseCardProps) => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
 
   const evidenceCount = c.evidenceCount || 0;
   const suspiciousActivities = c.suspiciousActivities || 0;
@@ -95,7 +97,7 @@ export const CaseCard = ({ case: c }: CaseCardProps) => {
                 <p className="text-sm text-text-secondary">
                   {c.assignedTo?.name || 'Unassigned'}
                 </p>
-                <p className="text-xs text-text-muted">{formatRelativeTime(c.updatedAt)}</p>
+                <p className="text-xs text-text-muted">{formatRelativeTime(c.updatedAt, language)}</p>
               </div>
             </div>
             <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(c.status)}`}>

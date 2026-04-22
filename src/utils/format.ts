@@ -1,4 +1,11 @@
 import { format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
+import { ru } from 'date-fns/locale';
+
+const dateFnsLocales: Record<string, Locale> = { ru };
+
+export const getDateLocale = (lang: string): Locale | undefined => {
+  return dateFnsLocales[lang];
+};
 
 const parseDate = (date: string | Date): Date | null => {
   if (!date) return null;
@@ -26,12 +33,15 @@ export const formatDate = (date: string | Date): string => {
   }
 };
 
-export const formatRelativeTime = (date: string | Date): string => {
+export const formatRelativeTime = (date: string | Date, lang?: string): string => {
   const parsed = parseDate(date);
   if (!parsed) return 'Invalid date';
-  
+
   try {
-    return formatDistanceToNow(parsed, { addSuffix: true });
+    return formatDistanceToNow(parsed, {
+      addSuffix: true,
+      locale: lang ? getDateLocale(lang) : undefined,
+    });
   } catch {
     return 'Invalid date';
   }
