@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Bell, Plus, X } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { SearchBar } from '@/components/ui/SearchBar';
-import { CreateCaseModal } from '@/components/cases/CreateCaseModal';
-import { casesService } from '@/services/cases.service';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { formatRelativeTime } from '@/utils/format';
-import { api } from '@/services/api';
-import { cn } from '@/utils/cn';
+import { useState, useEffect } from "react";
+import { Bell, Plus, X } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { SearchBar } from "@/components/ui/SearchBar";
+import { CreateCaseModal } from "@/components/cases/CreateCaseModal";
+import { casesService } from "@/services/cases.service";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { formatRelativeTime } from "@/utils/format";
+import { api } from "@/services/api";
+import { cn } from "@/utils/cn";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Notification {
   id: string;
@@ -16,7 +17,7 @@ interface Notification {
   message: string;
   createdAt: string;
   read: boolean;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: "info" | "success" | "warning" | "error";
   relatedEntityType?: string;
   relatedEntityId?: string;
 }
@@ -27,6 +28,7 @@ export const Header = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   const navigate = useNavigate();
+  const { language } = useLanguage();
 
   useEffect(() => {
     if (isNotificationsOpen) {
@@ -37,17 +39,17 @@ export const Header = () => {
   const fetchNotifications = async () => {
     try {
       setIsLoadingNotifications(true);
-      const { data } = await api.get('/notifications');
+      const { data } = await api.get("/notifications");
       setNotifications(data);
     } catch (error) {
       setNotifications([
         {
-          id: '1',
-          title: 'Welcome to Digital Forensics Platform for Cloud and IoT',
-          message: 'Start by creating your first case',
+          id: "1",
+          title: "Welcome to Digital Forensics Platform for Cloud and IoT",
+          message: "Start by creating your first case",
           createdAt: new Date().toISOString(),
           read: false,
-          type: 'info',
+          type: "info",
         },
       ]);
     } finally {
@@ -55,39 +57,44 @@ export const Header = () => {
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleCreateCase = async (data: any) => {
     try {
       const newCase = await casesService.create(data);
-      
+
       (window as any).showNotification?.({
-        type: 'success',
-        title: 'Case Created',
+        type: "success",
+        title: "Case Created",
         message: `Case "${data.title}" has been successfully created`,
       });
-      
+
       fetchNotifications();
       navigate(`/cases/${newCase.id}`);
     } catch (error: any) {
-      console.error('Failed to create case:', error);
-      
-      let errorMessage = 'Failed to create case';
-      
+      console.error("Failed to create case:", error);
+
+      let errorMessage = "Failed to create case";
+
       if (error.response?.data) {
         if (error.response.data.message) {
           errorMessage = error.response.data.message;
-        } else if (error.response.data.errors && Array.isArray(error.response.data.errors)) {
-          errorMessage = error.response.data.errors.map((e: any) => e.message || e).join(', ');
+        } else if (
+          error.response.data.errors &&
+          Array.isArray(error.response.data.errors)
+        ) {
+          errorMessage = error.response.data.errors
+            .map((e: any) => e.message || e)
+            .join(", ");
         }
       }
-      
+
       (window as any).showNotification?.({
-        type: 'error',
-        title: 'Error',
+        type: "error",
+        title: "Error",
         message: errorMessage,
       });
-      
+
       throw error;
     }
   };
@@ -95,44 +102,44 @@ export const Header = () => {
   const handleMarkAsRead = async (id: string) => {
     try {
       await api.put(`/notifications/${id}/read`);
-      setNotifications(prev => 
-        prev.map(n => n.id === id ? { ...n, read: true } : n)
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
       );
     } catch (error) {
-      setNotifications(prev => 
-        prev.map(n => n.id === id ? { ...n, read: true } : n)
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
       );
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
-      await api.put('/notifications/read-all');
-      setNotifications(prev => 
-        prev.map(n => ({ ...n, read: true }))
-      );
+      await api.put("/notifications/read-all");
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     } catch (error) {
-      setNotifications(prev => 
-        prev.map(n => ({ ...n, read: true }))
-      );
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     }
   };
 
   const handleDeleteNotification = async (id: string) => {
     try {
       await api.delete(`/notifications/${id}`);
-      setNotifications(prev => prev.filter(n => n.id !== id));
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
     } catch (error) {
-      setNotifications(prev => prev.filter(n => n.id !== id));
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
     }
   };
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'success': return '✅';
-      case 'error': return '🚨';
-      case 'warning': return '⚠️';
-      default: return 'ℹ️';
+      case "success":
+        return "✅";
+      case "error":
+        return "🚨";
+      case "warning":
+        return "⚠️";
+      default:
+        return "ℹ️";
     }
   };
 
@@ -148,9 +155,9 @@ export const Header = () => {
         <div className="flex items-center gap-4 ml-4">
           {/* Notifications Button */}
           <div className="relative">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
               className="relative"
             >
@@ -170,25 +177,27 @@ export const Header = () => {
             <AnimatePresence>
               {isNotificationsOpen && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-40" 
+                  <div
+                    className="fixed inset-0 z-40"
                     onClick={() => setIsNotificationsOpen(false)}
                   />
-                  
+
                   <motion.div
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     transition={{ duration: 0.15 }}
                     className={cn(
-                      'absolute right-0 top-full mt-2 w-96 rounded-lg shadow-2xl z-50 overflow-hidden',
-                      'bg-bg-secondary border border-border-primary',
+                      "absolute right-0 top-full mt-2 w-96 rounded-lg shadow-2xl z-50 overflow-hidden",
+                      "bg-bg-secondary border border-border-primary",
                     )}
                   >
                     {/* Header */}
                     <div className="p-4 border-b border-border-primary flex items-center justify-between">
                       <div>
-                        <h3 className="text-sm font-semibold text-text-primary">Notifications</h3>
+                        <h3 className="text-sm font-semibold text-text-primary">
+                          Notifications
+                        </h3>
                         {unreadCount > 0 && (
                           <p className="text-xs text-text-tertiary mt-0.5">
                             {unreadCount} unread
@@ -210,7 +219,9 @@ export const Header = () => {
                       {isLoadingNotifications ? (
                         <div className="p-8 text-center">
                           <div className="w-8 h-8 border-2 border-cyber-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                          <p className="text-sm text-text-tertiary">Loading...</p>
+                          <p className="text-sm text-text-tertiary">
+                            Loading...
+                          </p>
                         </div>
                       ) : notifications.length > 0 ? (
                         <div>
@@ -221,9 +232,9 @@ export const Header = () => {
                               animate={{ opacity: 1, x: 0 }}
                               exit={{ opacity: 0, x: 20 }}
                               className={cn(
-                                'p-4 border-b border-border-primary cursor-pointer transition-colors',
-                                'hover:bg-bg-hover',
-                                !notification.read && 'bg-cyan-500/5'
+                                "p-4 border-b border-border-primary cursor-pointer transition-colors",
+                                "hover:bg-bg-hover",
+                                !notification.read && "bg-cyan-500/5",
                               )}
                               onClick={() => handleMarkAsRead(notification.id)}
                             >
@@ -239,7 +250,9 @@ export const Header = () => {
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleDeleteNotification(notification.id);
+                                        handleDeleteNotification(
+                                          notification.id,
+                                        );
                                       }}
                                       className="text-text-muted hover:text-text-primary transition-colors"
                                     >
@@ -250,7 +263,7 @@ export const Header = () => {
                                     {notification.message}
                                   </p>
                                   <p className="text-xs text-text-tertiary mt-2">
-                                    {formatRelativeTime(notification.createdAt)}
+                                    {formatRelativeTime(notification.createdAt, language)}
                                   </p>
                                 </div>
                                 {!notification.read && (
@@ -263,7 +276,9 @@ export const Header = () => {
                       ) : (
                         <div className="p-8 text-center">
                           <Bell className="w-12 h-12 text-text-muted mx-auto mb-3" />
-                          <p className="text-sm text-text-tertiary">No notifications</p>
+                          <p className="text-sm text-text-tertiary">
+                            No notifications
+                          </p>
                         </div>
                       )}
                     </div>
@@ -271,7 +286,7 @@ export const Header = () => {
                     {/* Footer */}
                     {notifications.length > 0 && (
                       <div className="p-3 border-t border-border-primary text-center">
-                        <button 
+                        <button
                           onClick={() => setIsNotificationsOpen(false)}
                           className="text-xs text-cyber-400 hover:text-cyber-300 transition-colors"
                         >
@@ -284,15 +299,15 @@ export const Header = () => {
               )}
             </AnimatePresence>
           </div>
-          
-          <Button 
+
+          {/* <Button 
             size="sm" 
             className="gap-2"
             onClick={() => setIsCreateModalOpen(true)}
           >
             <Plus className="w-4 h-4" />
             New Case
-          </Button>
+          </Button> */}
         </div>
       </header>
 

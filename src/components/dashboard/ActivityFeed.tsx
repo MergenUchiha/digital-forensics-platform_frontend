@@ -35,7 +35,7 @@ const getColor = (type: Activity["type"]) => {
 };
 
 export const ActivityFeed = ({ activities }: ActivityFeedProps) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <Card>
@@ -58,7 +58,7 @@ export const ActivityFeed = ({ activities }: ActivityFeedProps) => {
                   </p>
                   <p className="text-xs text-text-muted mt-1">
                     {activity.user.name} ·{" "}
-                    {formatRelativeTime(activity.timestamp)}
+                    {formatRelativeTime(activity.timestamp, language)}
                   </p>
                 </div>
               </div>
