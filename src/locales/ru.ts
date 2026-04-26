@@ -142,6 +142,9 @@ export const ru = {
     loadingEvidence: "Загрузка доказательств...",
     describeEvidence: "Опишите доказательство...",
     enterEvidenceName: "Введите название доказательства...",
+    iotDeviceSource: "Источник IoT устройства",
+    allDevices: "Все устройства",
+    noDevice: "Нет устройства (не IoT)",
   },
 
   timeline: {
@@ -296,6 +299,19 @@ export const ru = {
     memory_dump: "Дамп памяти",
     file: "Файл",
     api_response: "Ответ API",
+    photo: "Фотография",
+  },
+
+  iotDevice: {
+    camera: "Камера",
+    smart_speaker: "Умная колонка",
+    sensor: "Датчик",
+    smart_lock: "Умный замок",
+    router: "Маршрутизатор",
+    dvr: "Видеорегистратор",
+    smart_tv: "Умный телевизор",
+    wearable: "Носимое устройство",
+    other: "Другое устройство",
   },
 
   eventType: {
