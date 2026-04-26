@@ -21,11 +21,14 @@ export const Evidence = () => {
   const [selectedCase, setSelectedCase] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [iotDeviceFilter, setIotDeviceFilter] = useState<string>("all");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadData, setUploadData] = useState({
     name: "",
-    type: "LOG" as const,
+    type: "LOG" as string,
     description: "",
     caseId: "",
+    iotDeviceType: "" as string,
   });
 
   useEffect(() => {
@@ -55,7 +58,14 @@ export const Evidence = () => {
 
   const handleFilesSelected = (files: File[]) => {
     if (files.length > 0) {
-      setUploadData((prev) => ({ ...prev, name: files[0].name }));
+      const file = files[0];
+      setSelectedFile(file);
+      const isImage = file.type.startsWith('image/');
+      setUploadData((prev) => ({
+        ...prev,
+        name: file.name,
+        type: isImage ? 'PHOTO' : prev.type,
+      }));
       setIsUploadModalOpen(true);
     }
   };
@@ -71,10 +81,13 @@ export const Evidence = () => {
       return;
     }
     try {
-      await evidenceService.create(uploadData);
+      const { iotDeviceType, ...rest } = uploadData;
+      const payload = iotDeviceType ? { ...rest, iotDeviceType } : rest;
+      await evidenceService.create(payload, selectedFile || undefined);
       await fetchData();
       setIsUploadModalOpen(false);
-      setUploadData({ name: "", type: "LOG", description: "", caseId: "" });
+      setSelectedFile(null);
+      setUploadData({ name: "", type: "LOG", description: "", caseId: "", iotDeviceType: "" });
       (window as any).showNotification?.({
         type: "success",
         title: t.evidence.evidenceUploaded,
@@ -93,6 +106,7 @@ export const Evidence = () => {
     setSearchQuery("");
     setSelectedCase("all");
     setTypeFilter("all");
+    setIotDeviceFilter("all");
   };
 
   const filteredEvidence = evidence.filter((e) => {
@@ -102,11 +116,13 @@ export const Evidence = () => {
     const matchesCase = selectedCase === "all" || e.caseId === selectedCase;
     const matchesType =
       typeFilter === "all" || e.type.toUpperCase() === typeFilter;
-    return matchesSearch && matchesCase && matchesType;
+    const matchesIotDevice =
+      iotDeviceFilter === "all" || e.iotDeviceType === iotDeviceFilter;
+    return matchesSearch && matchesCase && matchesType && matchesIotDevice;
   });
 
   const hasActiveFilters =
-    selectedCase !== "all" || typeFilter !== "all" || searchQuery !== "";
+    selectedCase !== "all" || typeFilter !== "all" || iotDeviceFilter !== "all" || searchQuery !== "";
 
   if (isLoading) {
     return (
@@ -165,6 +181,7 @@ export const Evidence = () => {
                     [
                       selectedCase !== "all",
                       typeFilter !== "all",
+                      iotDeviceFilter !== "all",
                       searchQuery !== "",
                     ].filter(Boolean).length
                   }
@@ -222,6 +239,30 @@ export const Evidence = () => {
                   <option value="API_RESPONSE">
                     {t.evidenceType.api_response}
                   </option>
+                  <option value="PHOTO">
+                    {t.evidenceType.photo}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  {t.evidence.iotDeviceSource}
+                </label>
+                <select
+                  value={iotDeviceFilter}
+                  onChange={(e) => setIotDeviceFilter(e.target.value)}
+                  className="w-full px-4 py-2 bg-bg-tertiary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500"
+                >
+                  <option value="all">{t.evidence.allDevices}</option>
+                  <option value="CAMERA">{t.iotDevice.camera}</option>
+                  <option value="SMART_SPEAKER">{t.iotDevice.smart_speaker}</option>
+                  <option value="SENSOR">{t.iotDevice.sensor}</option>
+                  <option value="SMART_LOCK">{t.iotDevice.smart_lock}</option>
+                  <option value="ROUTER">{t.iotDevice.router}</option>
+                  <option value="DVR">{t.iotDevice.dvr}</option>
+                  <option value="SMART_TV">{t.iotDevice.smart_tv}</option>
+                  <option value="WEARABLE">{t.iotDevice.wearable}</option>
+                  <option value="OTHER">{t.iotDevice.other}</option>
                 </select>
               </div>
               <div>
@@ -325,6 +366,30 @@ export const Evidence = () => {
               <option value="API_RESPONSE">
                 {t.evidenceType.api_response}
               </option>
+              <option value="PHOTO">{t.evidenceType.photo}</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-2">
+              {t.evidence.iotDeviceSource}
+            </label>
+            <select
+              value={uploadData.iotDeviceType}
+              onChange={(e) =>
+                setUploadData({ ...uploadData, iotDeviceType: e.target.value })
+              }
+              className="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500"
+            >
+              <option value="">{t.evidence.noDevice}</option>
+              <option value="CAMERA">{t.iotDevice.camera}</option>
+              <option value="SMART_SPEAKER">{t.iotDevice.smart_speaker}</option>
+              <option value="SENSOR">{t.iotDevice.sensor}</option>
+              <option value="SMART_LOCK">{t.iotDevice.smart_lock}</option>
+              <option value="ROUTER">{t.iotDevice.router}</option>
+              <option value="DVR">{t.iotDevice.dvr}</option>
+              <option value="SMART_TV">{t.iotDevice.smart_tv}</option>
+              <option value="WEARABLE">{t.iotDevice.wearable}</option>
+              <option value="OTHER">{t.iotDevice.other}</option>
             </select>
           </div>
           <div>

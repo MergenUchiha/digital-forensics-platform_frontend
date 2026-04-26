@@ -2,7 +2,8 @@
 
 export type CaseStatus = 'open' | 'in_progress' | 'closed' | 'archived';
 export type CaseSeverity = 'critical' | 'high' | 'medium' | 'low';
-export type EvidenceType = 'log' | 'network_capture' | 'disk_image' | 'memory_dump' | 'file' | 'api_response';
+export type EvidenceType = 'log' | 'network_capture' | 'disk_image' | 'memory_dump' | 'file' | 'api_response' | 'photo';
+export type IoTDeviceType = 'CAMERA' | 'SMART_SPEAKER' | 'SENSOR' | 'SMART_LOCK' | 'ROUTER' | 'DVR' | 'SMART_TV' | 'WEARABLE' | 'OTHER';
 export type AnalysisStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
 export interface User {
@@ -58,10 +59,13 @@ export interface EvidenceItem  {
   md5Hash?: string;
   sha256Hash?: string;
   size: number;
+  filePath?: string;
   fileSize?: number;
   uploadedBy: User;
   uploadedAt: string;
+  createdAt?: string;
   metadata: Record<string, any>;
+  iotDeviceType?: IoTDeviceType;
   chainOfCustody: ChainOfCustodyEntry[];
 }
 

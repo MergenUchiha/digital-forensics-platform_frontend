@@ -142,6 +142,9 @@ export const en = {
     loadingEvidence: "Loading evidence...",
     describeEvidence: "Describe the evidence...",
     enterEvidenceName: "Enter evidence name...",
+    iotDeviceSource: "IoT Device Source",
+    allDevices: "All Devices",
+    noDevice: "No device (not IoT)",
   },
 
   timeline: {
@@ -296,6 +299,19 @@ export const en = {
     memory_dump: "Memory Dump",
     file: "File",
     api_response: "API Response",
+    photo: "Photo",
+  },
+
+  iotDevice: {
+    camera: "Camera",
+    smart_speaker: "Smart Speaker",
+    sensor: "Sensor",
+    smart_lock: "Smart Lock",
+    router: "Router",
+    dvr: "DVR / NVR",
+    smart_tv: "Smart TV",
+    wearable: "Wearable Device",
+    other: "Other Device",
   },
 
   eventType: {

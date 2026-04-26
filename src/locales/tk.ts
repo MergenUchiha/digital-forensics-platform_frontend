@@ -142,6 +142,9 @@ export const tk = {
     loadingEvidence: "Subutnamalar ýüklenýär...",
     describeEvidence: "Subutnama barada düşündiriş beriň...",
     enterEvidenceName: "Subutnama adyny giriziň...",
+    iotDeviceSource: "IoT enjam çeşmesi",
+    allDevices: "Ähli enjamlar",
+    noDevice: "Enjam ýok (IoT däl)",
   },
 
   timeline: {
@@ -296,6 +299,19 @@ export const tk = {
     memory_dump: "Ýat dökülmesi",
     file: "Faýl",
     api_response: "API jogaby",
+    photo: "Surat",
+  },
+
+  iotDevice: {
+    camera: "Kamera",
+    smart_speaker: "Akylly ses sütüni",
+    sensor: "Datçik",
+    smart_lock: "Akylly gulp",
+    router: "Marşrutizator",
+    dvr: "Wideo ýazyjy",
+    smart_tv: "Akylly telewizor",
+    wearable: "Geýilýän enjam",
+    other: "Başga enjam",
   },
 
   eventType: {
