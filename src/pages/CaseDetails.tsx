@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
+import { Badge, type BadgeVariant } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
@@ -27,6 +27,8 @@ import { casesService } from "@/services/cases.service";
 import { evidenceService } from "@/services/evidence.service";
 import { timelineService } from "@/services/timeline.service";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { handleApiError } from "@/services/api";
+import type { CaseSeverity, CaseStatus, UpdateCasePayload } from "@/types";
 
 export const CaseDetails = () => {
   const { t, language } = useLanguage();
@@ -40,6 +42,11 @@ export const CaseDetails = () => {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // `Date.now()` read from the render body makes the component impure: two
+  // renders with identical props would disagree about the elapsed time. The
+  // hook has to sit above the early returns below.
+  const [now] = useState(() => Date.now());
+
   const [editFormData, setEditFormData] = useState({
     title: "",
     description: "",
@@ -47,11 +54,7 @@ export const CaseDetails = () => {
     status: "OPEN",
   });
 
-  useEffect(() => {
-    if (id) fetchCaseData(id);
-  }, [id]);
-
-  const fetchCaseData = async (caseId: string) => {
+  const fetchCaseData = useCallback(async (caseId: string) => {
     try {
       setIsLoading(true);
       const [caseResponse, evidenceResponse, eventsResponse] =
@@ -69,8 +72,8 @@ export const CaseDetails = () => {
         severity: caseResponse.severity.toString().toUpperCase(),
         status: caseResponse.status.toString().toUpperCase(),
       });
-    } catch (error: any) {
-      (window as any).showNotification?.({
+    } catch {
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
         message: t.caseDetails.caseNotFoundMsg,
@@ -78,13 +81,20 @@ export const CaseDetails = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+   }, []);
+
+  // Declared before the effect that lists it as a dependency; a `const`
+  // read from a dependency array during render is still in its temporal dead
+  // zone if it is declared below.
+  useEffect(() => {
+    if (id) void fetchCaseData(id);
+  }, [id, fetchCaseData]);
 
   const handleEditCase = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id || !caseData) return;
     try {
-      const updateData: any = {};
+      const updateData: UpdateCasePayload = {};
       if (editFormData.title !== caseData.title)
         updateData.title = editFormData.title;
       if (editFormData.description !== caseData.description)
@@ -93,15 +103,15 @@ export const CaseDetails = () => {
         editFormData.severity.toUpperCase() !==
         caseData.severity.toString().toUpperCase()
       )
-        updateData.severity = editFormData.severity.toUpperCase();
+        updateData.severity = editFormData.severity.toUpperCase() as CaseSeverity;
       if (
         editFormData.status.toUpperCase() !==
         caseData.status.toString().toUpperCase()
       )
-        updateData.status = editFormData.status.toUpperCase();
+        updateData.status = editFormData.status.toUpperCase() as CaseStatus;
 
       if (Object.keys(updateData).length === 0) {
-        (window as any).showNotification?.({
+        window.showNotification?.({
           type: "info",
           title: t.caseDetails.noChanges,
           message: t.caseDetails.noChangesMsg,
@@ -112,15 +122,15 @@ export const CaseDetails = () => {
       await casesService.update(id, updateData);
       await fetchCaseData(id);
       setIsEditModalOpen(false);
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "success",
         title: t.caseDetails.caseUpdated,
         message: t.caseDetails.caseUpdatedMsg,
       });
-    } catch (error: any) {
+    } catch (error) {
       const errorMessage =
-        error.response?.data?.message || t.messages.operationFailed;
-      (window as any).showNotification?.({
+        handleApiError(error) || t.messages.operationFailed;
+      window.showNotification?.({
         type: "error",
         title: t.caseDetails.updateFailed,
         message: errorMessage,
@@ -134,7 +144,7 @@ export const CaseDetails = () => {
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "success",
         title: t.caseDetails.linkCopied,
         message: t.caseDetails.linkCopiedMsg,
@@ -188,11 +198,13 @@ export const CaseDetails = () => {
     { id: "analysis" as const, label: t.caseDetails.analysis, icon: Activity },
   ];
 
-  const severityColors: any = {
-    critical: "danger",
-    high: "warning",
-    medium: "info",
-    low: "success",
+  const hoursElapsed = Math.floor(
+    (now - new Date(caseData.createdAt).getTime()) / 3_600_000,
+  );
+
+  // Both cases were listed because nothing established which one the API
+  // returns. It returns upper case; the types say so now.
+  const severityColors: Record<string, BadgeVariant> = {
     CRITICAL: "danger",
     HIGH: "warning",
     MEDIUM: "info",
@@ -316,11 +328,7 @@ export const CaseDetails = () => {
                 {t.caseDetails.timeElapsed}
               </p>
               <p className="text-2xl font-bold text-gray-100">
-                {Math.floor(
-                  (Date.now() - new Date(caseData.createdAt).getTime()) /
-                    (1000 * 60 * 60),
-                )}
-                h
+                {hoursElapsed}h
               </p>
             </div>
           </CardContent>

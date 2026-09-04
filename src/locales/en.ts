@@ -65,6 +65,7 @@ export const en = {
     criticalAlerts: "Critical Alerts",
     activeIncidents: "Active Incidents",
     threatsBlocked: "Threats Blocked",
+    evidenceCollected: "Evidence Collected",
     recentActivity: "Recent Activity",
     topThreats: "Top Threat Types",
     globalMap: "Global Incident Map",

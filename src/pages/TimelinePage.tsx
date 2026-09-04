@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Timeline } from "@/components/timeline/Timeline";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -9,6 +9,8 @@ import { casesService } from "@/services/cases.service";
 import { TimelineEvent, Case } from "@/types";
 import { Download, Plus } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { handleApiError } from "@/services/api";
+import type { CaseSeverity } from "@/types";
 
 export const TimelinePage = () => {
   const { t } = useLanguage();
@@ -21,19 +23,15 @@ export const TimelinePage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newEvent, setNewEvent] = useState({
     timestamp: new Date().toISOString().slice(0, 16),
-    type: "SYSTEM" as const,
+    type: "SYSTEM" as string,
     source: "",
-    severity: "INFO" as const,
+    severity: "MEDIUM" as CaseSeverity,
     title: "",
     description: "",
     caseId: "",
   });
 
-  useEffect(() => {
-    fetchData();
-  }, [severityFilter, selectedCase]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
       const [eventsData, casesData] = await Promise.all([
@@ -47,7 +45,7 @@ export const TimelinePage = () => {
       setCases(casesData);
     } catch (error) {
       console.error("Failed to fetch timeline events:", error);
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
         message: t.messages.operationFailed,
@@ -55,12 +53,18 @@ export const TimelinePage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [severityFilter, selectedCase]);
+
+  // Declared before the effect that depends on it; a `const` read from a
+  // dependency array during render is still in its temporal dead zone.
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEvent.caseId) {
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
         message: t.timeline.selectCase,
@@ -72,7 +76,7 @@ export const TimelinePage = () => {
         timestamp: new Date(newEvent.timestamp).toISOString(),
         type: newEvent.type.toUpperCase(),
         source: newEvent.source,
-        severity: newEvent.severity.toUpperCase(),
+        severity: newEvent.severity,
         title: newEvent.title,
         description: newEvent.description,
         caseId: newEvent.caseId,
@@ -89,20 +93,20 @@ export const TimelinePage = () => {
         timestamp: new Date().toISOString().slice(0, 16),
         type: "SYSTEM",
         source: "",
-        severity: "INFO",
+        severity: "MEDIUM",
         title: "",
         description: "",
         caseId: "",
       });
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "success",
         title: t.timeline.eventCreated,
         message: t.timeline.eventCreated,
       });
-    } catch (error: any) {
+    } catch (error) {
       const errorMessage =
-        error.response?.data?.message || t.messages.operationFailed;
-      (window as any).showNotification?.({
+        handleApiError(error) || t.messages.operationFailed;
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
         message: errorMessage,
@@ -268,7 +272,7 @@ export const TimelinePage = () => {
               <select
                 value={newEvent.type}
                 onChange={(e) =>
-                  setNewEvent({ ...newEvent, type: e.target.value as any })
+                  setNewEvent({ ...newEvent, type: e.target.value })
                 }
                 className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
                 required
@@ -307,7 +311,10 @@ export const TimelinePage = () => {
               <select
                 value={newEvent.severity}
                 onChange={(e) =>
-                  setNewEvent({ ...newEvent, severity: e.target.value as any })
+                  setNewEvent({
+                    ...newEvent,
+                    severity: e.target.value as CaseSeverity,
+                  })
                 }
                 className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyber-500"
                 required

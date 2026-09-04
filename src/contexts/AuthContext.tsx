@@ -1,6 +1,7 @@
 // src/contexts/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '@/services/auth.service';
+import { handleApiError } from '@/services/api';
 import { User } from '@/types';
 
 interface AuthContextType {
@@ -41,16 +42,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await authService.login({ email, password });
       setUser(response.user);
       
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: 'success',
         title: 'Login Successful',
         message: `Welcome back, ${response.user.name}!`,
       });
-    } catch (error: any) {
-      (window as any).showNotification?.({
+    } catch (error) {
+      // The API layer rejects with an ApiError, so `error.response` is always
+      // undefined here and the server's message was thrown away.
+      window.showNotification?.({
         type: 'error',
-        title: 'Login Failed',
-        message: error.response?.data?.message || 'Invalid credentials',
+        title: 'Login failed',
+        message: handleApiError(error) || 'Invalid credentials',
       });
       throw error;
     }
@@ -61,16 +64,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await authService.register({ email, password, name });
       setUser(response.user);
       
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: 'success',
         title: 'Registration Successful',
         message: `Welcome, ${response.user.name}!`,
       });
-    } catch (error: any) {
-      (window as any).showNotification?.({
+    } catch (error) {
+      window.showNotification?.({
         type: 'error',
-        title: 'Registration Failed',
-        message: error.response?.data?.message || 'Registration failed',
+        title: 'Could not create the account',
+        message: handleApiError(error) || 'Account creation failed',
       });
       throw error;
     }
@@ -80,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     authService.logout();
     setUser(null);
     
-    (window as any).showNotification?.({
+    window.showNotification?.({
       type: 'info',
       title: 'Logged Out',
       message: 'You have been successfully logged out',

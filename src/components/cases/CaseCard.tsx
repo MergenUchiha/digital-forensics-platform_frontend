@@ -12,10 +12,10 @@ interface CaseCardProps {
 }
 
 const severityColors = {
-  critical: 'danger',
-  high: 'warning',
-  medium: 'info',
-  low: 'success',
+  CRITICAL: 'danger',
+  HIGH: 'warning',
+  MEDIUM: 'info',
+  LOW: 'success',
 } as const;
 
 export const CaseCard = ({ case: c }: CaseCardProps) => {

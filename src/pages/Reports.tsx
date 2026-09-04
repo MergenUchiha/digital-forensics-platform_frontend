@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { FileText, Download, Eye, Plus, AlertTriangle } from "lucide-react";
 import { formatDate } from "@/utils/format";
 import { casesService } from "@/services/cases.service";
+import { handleApiError } from "@/services/api";
 import { evidenceService } from "@/services/evidence.service";
 import { timelineService } from "@/services/timeline.service";
 import { exportCaseToPDF } from "@/utils/pdfExport";
@@ -33,11 +34,7 @@ export const Reports = () => {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const casesData = await casesService.getAll();
       setCases(casesData);
@@ -57,18 +54,25 @@ export const Reports = () => {
       }
     } catch (error) {
       console.error("Failed to fetch data:", error);
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
         message: t.messages.operationFailed,
       });
     }
-  };
+  }, []);
+
+  // Declared before the effect that lists it as a dependency: the array is
+  // evaluated during render, where a `const` declared below is still in its
+  // temporal dead zone.
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 
   const handleGenerateReport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCaseId) {
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
         message: t.reports.selectCaseLabel,
@@ -97,19 +101,16 @@ export const Reports = () => {
       localStorage.setItem("forensics_reports", JSON.stringify(updatedReports));
       setIsGenerateModalOpen(false);
       setSelectedCaseId("");
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "success",
         title: t.reports.reportGenerated,
         message: t.reports.reportGenerated,
       });
-    } catch (error: any) {
-      let errorMessage = t.messages.operationFailed;
-      if (error.response?.data?.message)
-        errorMessage = error.response.data.message;
-      (window as any).showNotification?.({
+    } catch (error) {
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
-        message: errorMessage,
+        message: handleApiError(error) || t.messages.operationFailed,
       });
     } finally {
       setIsGenerating(false);
@@ -119,7 +120,7 @@ export const Reports = () => {
   const handleViewReport = (report: Report) => {
     const caseExists = cases.some((c) => c.id === report.caseId);
     if (!caseExists) {
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "warning",
         title: t.reports.caseDeletedBadge,
         message: t.reports.caseDeletedBadge,
@@ -138,14 +139,14 @@ export const Reports = () => {
         timelineService.getAll(report.caseId),
       ]);
       exportCaseToPDF(caseData, evidence, events);
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "success",
         title: t.reports.reportDownloaded,
         message: t.reports.reportDownloaded,
       });
-    } catch (error: any) {
+    } catch (error) {
       let errorMessage = t.messages.operationFailed;
-      if (error.message?.includes("not found")) {
+      if (error instanceof Error && error.message.includes("not found")) {
         errorMessage = t.reports.caseDeletedBadge;
         const updatedReports = reports.filter((r) => r.id !== report.id);
         setReports(updatedReports);
@@ -154,7 +155,7 @@ export const Reports = () => {
           JSON.stringify(updatedReports),
         );
       }
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
         message: errorMessage,
@@ -166,7 +167,7 @@ export const Reports = () => {
     const updatedReports = reports.filter((r) => r.id !== reportId);
     setReports(updatedReports);
     localStorage.setItem("forensics_reports", JSON.stringify(updatedReports));
-    (window as any).showNotification?.({
+    window.showNotification?.({
       type: "info",
       title: t.reports.reportRemoved,
       message: t.reports.reportRemovedMsg,

@@ -106,7 +106,7 @@ export const NotificationContainer = () => {
 
   useEffect(() => {
     // Глобальная функция для добавления уведомлений
-    (window as any).showNotification = (data: Omit<NotificationData, 'id'>) => {
+    window.showNotification = (data: Omit<NotificationData, 'id'>) => {
       const notification: NotificationData = {
         ...data,
         id: `${Date.now()}-${Math.random()}`,
@@ -115,7 +115,7 @@ export const NotificationContainer = () => {
     };
 
     return () => {
-      delete (window as any).showNotification;
+      delete window.showNotification;
     };
   }, []);
 

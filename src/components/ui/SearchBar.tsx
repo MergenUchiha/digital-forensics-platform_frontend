@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Clock, TrendingUp, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { mockCases, mockEvidence } from '@/data/mockData';
+import { casesService } from '@/services/cases.service';
+import { evidenceService } from '@/services/evidence.service';
 import { cn } from '@/utils/cn';
 
 interface SearchResult {
@@ -23,58 +24,88 @@ export const SearchBar = ({ placeholder = 'Search...', autoFocus = false }: Sear
   const [isOpen, setIsOpen] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  // Read during the first render instead of from an effect, which painted an
+  // empty list and then replaced it.
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('recentSearches');
+      return saved ? (JSON.parse(saved) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
   
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('recentSearches');
-    if (saved) {
-      setRecentSearches(JSON.parse(saved));
-    }
-  }, []);
-
+  // This searched `mockCases` and `mockEvidence` — the box in the header
+  // never touched the API, so it found fictional cases and missed real ones.
+  // The backend has no search endpoint, so the caller's own cases and evidence
+  // are fetched once and filtered here.
   useEffect(() => {
     if (query.length < 2) {
-      setResults([]);
-      return;
+      // Clearing on a short query is a synchronous set, so it goes through a
+      // microtask rather than running straight in the effect body.
+      const clear = setTimeout(() => setResults([]), 0);
+      return () => clearTimeout(clear);
     }
 
-    const searchQuery = query.toLowerCase();
-    const foundResults: SearchResult[] = [];
+    let cancelled = false;
 
-    mockCases.forEach(c => {
-      if (c.title.toLowerCase().includes(searchQuery) || 
-          c.description.toLowerCase().includes(searchQuery) ||
-          c.tags.some(tag => tag.toLowerCase().includes(searchQuery))) {
-        foundResults.push({
-          id: `case-${c.id}`,
-          type: 'case',
-          title: c.title,
-          subtitle: c.description,
-          icon: FileText,
-          path: `/cases/${c.id}`,
-        });
+    const run = async () => {
+      try {
+        const [cases, evidence] = await Promise.all([
+          casesService.getAll(),
+          evidenceService.getAll(),
+        ]);
+        if (cancelled) return;
+
+        const needle = query.toLowerCase();
+        const found: SearchResult[] = [];
+
+        for (const c of cases) {
+          const haystack = [c.title, c.description, ...(c.tags ?? [])]
+            .join(' ')
+            .toLowerCase();
+          if (haystack.includes(needle)) {
+            found.push({
+              id: `case-${c.id}`,
+              type: 'case',
+              title: c.title,
+              subtitle: c.description,
+              icon: FileText,
+              path: `/cases/${c.id}`,
+            });
+          }
+        }
+
+        for (const e of evidence) {
+          const haystack = `${e.name} ${e.description ?? ''}`.toLowerCase();
+          if (haystack.includes(needle)) {
+            found.push({
+              id: `evidence-${e.id}`,
+              type: 'evidence',
+              title: e.name,
+              subtitle: e.description,
+              icon: FileText,
+              path: `/cases/${e.caseId}`,
+            });
+          }
+        }
+
+        setResults(found.slice(0, 10));
+        setSelectedIndex(0);
+      } catch {
+        if (!cancelled) setResults([]);
       }
-    });
+    };
 
-    mockEvidence.forEach(e => {
-      if (e.name.toLowerCase().includes(searchQuery) || 
-          e.description?.toLowerCase().includes(searchQuery)) {
-        foundResults.push({
-          id: `evidence-${e.id}`,
-          type: 'evidence',
-          title: e.name,
-          subtitle: e.description,
-          icon: FileText,
-          path: `/evidence`,
-        });
-      }
-    });
+    const debounce = setTimeout(() => void run(), 250);
 
-    setResults(foundResults.slice(0, 10));
-    setSelectedIndex(0);
+    return () => {
+      cancelled = true;
+      clearTimeout(debounce);
+    };
   }, [query]);
 
   useEffect(() => {

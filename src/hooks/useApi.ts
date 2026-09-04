@@ -7,8 +7,8 @@ interface UseApiState<T> {
   error: string | null;
 }
 
-interface UseApiOptions {
-  onSuccess?: (data: any) => void;
+interface UseApiOptions<T = unknown> {
+  onSuccess?: (data: T) => void;
   onError?: (error: string) => void;
   showNotification?: boolean;
 }
@@ -16,7 +16,7 @@ interface UseApiOptions {
 /**
  * Custom hook for API requests with automatic loading and error states
  */
-export function useApi<T = any>(options: UseApiOptions = {}) {
+export function useApi<T = unknown>(options: UseApiOptions<T> = {}) {
   const [state, setState] = useState<UseApiState<T>>({
     data: null,
     loading: false,
@@ -49,7 +49,7 @@ export function useApi<T = any>(options: UseApiOptions = {}) {
         }
 
         return result;
-      } catch (error: any) {
+      } catch (error) {
         if (!isMountedRef.current) return null;
 
         const errorMessage = handleApiError(error);
@@ -58,7 +58,7 @@ export function useApi<T = any>(options: UseApiOptions = {}) {
 
         // Show notification if enabled
         if (options.showNotification !== false) {
-          (window as any).showNotification?.({
+          window.showNotification?.({
             type: 'error',
             title: 'Error',
             message: errorMessage,
@@ -90,9 +90,9 @@ export function useApi<T = any>(options: UseApiOptions = {}) {
 /**
  * Hook for mutations (POST, PUT, DELETE)
  */
-export function useMutation<TData = any, TVariables = any>(
+export function useMutation<TData = unknown, TVariables = void>(
   mutationFn: (variables: TVariables) => Promise<TData>,
-  options: UseApiOptions = {}
+  options: UseApiOptions<TData> = {}
 ) {
   const { execute, ...state } = useApi<TData>(options);
 
@@ -112,9 +112,12 @@ export function useMutation<TData = any, TVariables = any>(
 /**
  * Hook for queries (GET)
  */
-export function useQuery<T = any>(
+export function useQuery<T = unknown>(
   queryFn: () => Promise<T>,
-  options: UseApiOptions & { enabled?: boolean; refetchInterval?: number } = {}
+  options: UseApiOptions<T> & {
+    enabled?: boolean;
+    refetchInterval?: number;
+  } = {}
 ) {
   const { enabled = true, refetchInterval } = options;
   const { execute, ...state } = useApi<T>(options);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CaseCard } from "@/components/cases/CaseCard";
 import {
   CreateCaseModal,
@@ -10,6 +10,7 @@ import { casesService } from "@/services/cases.service";
 import { Case } from "@/types";
 import { Plus, Search } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { handleApiError } from "@/services/api";
 
 export const Cases = () => {
   const { t } = useLanguage();
@@ -20,11 +21,7 @@ export const Cases = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchCases();
-  }, [statusFilter]);
-
-  const fetchCases = async () => {
+  const fetchCases = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -44,11 +41,11 @@ export const Cases = () => {
       }));
 
       setCases(normalizedData as Case[]);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to fetch cases:", error);
-      setError(error.response?.data?.message || t.cases.errorLoading);
+      setError(handleApiError(error) || t.cases.errorLoading);
 
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
         message: t.cases.errorLoading,
@@ -56,7 +53,14 @@ export const Cases = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  // Declared before the effect that lists it as a dependency: the array is
+  // evaluated during render, where a `const` declared below is still in its
+  // temporal dead zone.
+  useEffect(() => {
+    void fetchCases();
+  }, [statusFilter, fetchCases]);
 
   const handleCreateCase = async (data: CaseFormData) => {
     try {
@@ -81,18 +85,17 @@ export const Cases = () => {
       await casesService.create(apiData);
       await fetchCases();
 
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "success",
         title: t.cases.caseCreated,
         message: `${t.cases.caseCreated}: "${data.title}"`,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to create case:", error);
       const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.errors?.[0]?.message ||
+        handleApiError(error) ||
         t.messages.operationFailed;
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
         message: errorMessage,

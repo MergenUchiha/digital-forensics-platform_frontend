@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { EvidenceCard } from "@/components/evidence/EvidenceCard";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { Button } from "@/components/ui/Button";
@@ -31,11 +31,7 @@ export const Evidence = () => {
     iotDeviceType: "" as string,
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
       const [evidenceData, casesData] = await Promise.all([
@@ -46,7 +42,7 @@ export const Evidence = () => {
       setCases(casesData);
     } catch (error) {
       console.error("Failed to fetch evidence:", error);
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
         message: t.messages.operationFailed,
@@ -54,7 +50,14 @@ export const Evidence = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  // Declared before the effect that lists it as a dependency: the array is
+  // evaluated during render, where a `const` declared below is still in its
+  // temporal dead zone.
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 
   const handleFilesSelected = (files: File[]) => {
     if (files.length > 0) {
@@ -73,7 +76,7 @@ export const Evidence = () => {
   const handleUploadEvidence = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!uploadData.caseId) {
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
         message: t.evidence.selectCase,
@@ -88,13 +91,13 @@ export const Evidence = () => {
       setIsUploadModalOpen(false);
       setSelectedFile(null);
       setUploadData({ name: "", type: "LOG", description: "", caseId: "", iotDeviceType: "" });
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "success",
         title: t.evidence.evidenceUploaded,
         message: t.evidence.evidenceUploaded,
       });
-    } catch (error) {
-      (window as any).showNotification?.({
+    } catch {
+      window.showNotification?.({
         type: "error",
         title: t.common.error,
         message: t.messages.operationFailed,
@@ -351,7 +354,7 @@ export const Evidence = () => {
             <select
               value={uploadData.type}
               onChange={(e) =>
-                setUploadData({ ...uploadData, type: e.target.value as any })
+                setUploadData({ ...uploadData, type: e.target.value })
               }
               className="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500"
               required

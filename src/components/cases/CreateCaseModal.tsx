@@ -2,34 +2,23 @@ import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import type { CaseSeverity, CaseStatus, CreateCasePayload } from '@/types';
 
 interface CreateCaseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: CreateCasePayload) => Promise<void>;
 }
 
-export interface CaseFormData {
-  title: string;
-  description: string;
-  severity: string;
-  status?: string;
-  tags?: string[];
-  location?: {
-    city: string;
-    country: string;
-    lat?: number;
-    lng?: number;
-  };
-  assignedToId?: string;
-}
+/** The form collects exactly what the create endpoint accepts. */
+export type CaseFormData = CreateCasePayload;
 
 export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalProps) => {
   const [formData, setFormData] = useState<CaseFormData>({
     title: '',
     description: '',
-    severity: 'MEDIUM',
-    status: 'OPEN',
+    severity: 'MEDIUM' as CaseSeverity,
+    status: 'OPEN' as CaseStatus,
     tags: [],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,8 +34,8 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
       setFormData({
         title: '',
         description: '',
-        severity: 'MEDIUM',
-        status: 'OPEN',
+        severity: 'MEDIUM' as CaseSeverity,
+        status: 'OPEN' as CaseStatus,
         tags: [],
       });
       setTagInput('');
@@ -115,7 +104,12 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
             </label>
             <select
               value={formData.severity}
-              onChange={(e) => setFormData({ ...formData, severity: e.target.value })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  severity: e.target.value as CaseSeverity,
+                })
+              }
               className="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent transition-all duration-200"
             >
               <option value="LOW">Low</option>
@@ -131,7 +125,12 @@ export const CreateCaseModal = ({ isOpen, onClose, onSubmit }: CreateCaseModalPr
             </label>
             <select
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  status: e.target.value as CaseStatus,
+                })
+              }
               className="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-cyber-500 focus:border-transparent transition-all duration-200"
             >
               <option value="OPEN">Open</option>

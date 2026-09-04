@@ -4,12 +4,13 @@ import { Badge } from "@/components/ui/Badge";
 import { formatDate } from "@/utils/format";
 import { Shield, Network, FileText, Bell, Lock, Activity } from "lucide-react";
 import { motion } from "framer-motion";
+import type { LucideIcon } from 'lucide-react';
 
 interface TimelineProps {
   events: TimelineEvent[];
 }
 
-const eventIcons: Record<string, any> = {
+const eventIcons: Record<string, LucideIcon> = {
   AUTHENTICATION: Lock,
   authentication: Lock,
   NETWORK: Network,

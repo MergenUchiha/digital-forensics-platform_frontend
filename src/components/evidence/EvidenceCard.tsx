@@ -111,7 +111,7 @@ export const EvidenceCard = ({ evidence }: EvidenceCardProps) => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       } catch {
-        (window as any).showNotification?.({
+        window.showNotification?.({
           type: 'error',
           title: 'Download Failed',
           message: 'Failed to download the file',
@@ -139,7 +139,7 @@ Uploaded By: ${evidence.uploadedBy?.name || 'Unknown'}`;
       window.URL.revokeObjectURL(url);
     }
 
-    (window as any).showNotification?.({
+    window.showNotification?.({
       type: 'success',
       title: 'Download Complete',
       message: `${evidence.name} has been downloaded`,

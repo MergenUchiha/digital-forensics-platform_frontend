@@ -65,6 +65,7 @@ export const ru = {
     criticalAlerts: "Критические оповещения",
     activeIncidents: "Активные инциденты",
     threatsBlocked: "Угроз заблокировано",
+    evidenceCollected: "Собрано улик",
     recentActivity: "Последняя активность",
     topThreats: "Основные типы угроз",
     globalMap: "Карта инцидентов",

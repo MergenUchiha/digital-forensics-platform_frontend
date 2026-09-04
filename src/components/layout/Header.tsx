@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Bell, Plus, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Bell, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { CreateCaseModal } from "@/components/cases/CreateCaseModal";
@@ -7,9 +7,10 @@ import { casesService } from "@/services/cases.service";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatRelativeTime } from "@/utils/format";
-import { api } from "@/services/api";
+import { api, handleApiError } from "@/services/api";
 import { cn } from "@/utils/cn";
 import { useLanguage } from "@/contexts/LanguageContext";
+import type { CreateCasePayload } from "@/types";
 
 interface Notification {
   id: string;
@@ -30,18 +31,12 @@ export const Header = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
 
-  useEffect(() => {
-    if (isNotificationsOpen) {
-      fetchNotifications();
-    }
-  }, [isNotificationsOpen]);
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       setIsLoadingNotifications(true);
       const { data } = await api.get("/notifications");
       setNotifications(data);
-    } catch (error) {
+    } catch {
       setNotifications([
         {
           id: "1",
@@ -55,15 +50,24 @@ export const Header = () => {
     } finally {
       setIsLoadingNotifications(false);
     }
-  };
+   }, []);
+
+  // Declared above the effect that depends on it: a dependency array is
+  // evaluated during render, and a `const` declared further down is still in
+  // the temporal dead zone at that point.
+  useEffect(() => {
+    if (isNotificationsOpen) {
+      void fetchNotifications();
+    }
+  }, [isNotificationsOpen, fetchNotifications]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleCreateCase = async (data: any) => {
+  const handleCreateCase = async (data: CreateCasePayload) => {
     try {
       const newCase = await casesService.create(data);
 
-      (window as any).showNotification?.({
+      window.showNotification?.({
         type: "success",
         title: "Case Created",
         message: `Case "${data.title}" has been successfully created`,
@@ -71,28 +75,14 @@ export const Header = () => {
 
       fetchNotifications();
       navigate(`/cases/${newCase.id}`);
-    } catch (error: any) {
-      console.error("Failed to create case:", error);
-
-      let errorMessage = "Failed to create case";
-
-      if (error.response?.data) {
-        if (error.response.data.message) {
-          errorMessage = error.response.data.message;
-        } else if (
-          error.response.data.errors &&
-          Array.isArray(error.response.data.errors)
-        ) {
-          errorMessage = error.response.data.errors
-            .map((e: any) => e.message || e)
-            .join(", ");
-        }
-      }
-
-      (window as any).showNotification?.({
+    } catch (error) {
+      // `error.response.data.message` never resolved: the API layer rejects
+      // with an ApiError, which has no `.response`, so this always fell
+      // through to the generic fallback.
+      window.showNotification?.({
         type: "error",
         title: "Error",
-        message: errorMessage,
+        message: handleApiError(error, "Failed to create case"),
       });
 
       throw error;
@@ -105,7 +95,7 @@ export const Header = () => {
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
       );
-    } catch (error) {
+    } catch {
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
       );
@@ -116,7 +106,7 @@ export const Header = () => {
     try {
       await api.put("/notifications/read-all");
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    } catch (error) {
+    } catch {
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     }
   };
@@ -125,7 +115,7 @@ export const Header = () => {
     try {
       await api.delete(`/notifications/${id}`);
       setNotifications((prev) => prev.filter((n) => n.id !== id));
-    } catch (error) {
+    } catch {
       setNotifications((prev) => prev.filter((n) => n.id !== id));
     }
   };

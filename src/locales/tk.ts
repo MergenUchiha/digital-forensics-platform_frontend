@@ -65,6 +65,7 @@ export const tk = {
     criticalAlerts: "Kritiki duýduryşlar",
     activeIncidents: "Işjeň hadysalar",
     threatsBlocked: "Howplar petiklendi",
+    evidenceCollected: "Ýygnalan subutnamalar",
     recentActivity: "Soňky işjeňlik",
     topThreats: "Esasy howp görnüşleri",
     globalMap: "Hadysalar kartasy",

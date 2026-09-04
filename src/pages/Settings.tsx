@@ -7,6 +7,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { api } from "@/services/api";
 import { User, Lock, Palette } from "lucide-react";
+import { ApiError, handleApiError } from "@/services/api";
 
 export const Settings = () => {
     const { user } = useAuth();
@@ -70,16 +71,16 @@ export const Settings = () => {
                 name: profileData.name,
             });
 
-            (window as any).showNotification?.({
+            window.showNotification?.({
                 type: "success",
                 title: t.settings.profileUpdated,
                 message: t.settings.profileUpdated,
             });
-        } catch (error: any) {
+        } catch (error) {
             const errorMessage =
-                error.response?.data?.message || t.common.error;
+                handleApiError(error) || t.common.error;
 
-            (window as any).showNotification?.({
+            window.showNotification?.({
                 type: "error",
                 title: t.common.error,
                 message: errorMessage,
@@ -93,7 +94,7 @@ export const Settings = () => {
         e.preventDefault();
 
         if (passwordData.newPassword !== passwordData.confirmPassword) {
-            (window as any).showNotification?.({
+            window.showNotification?.({
                 type: "error",
                 title: t.common.error,
                 message: t.settings.passwordMismatch,
@@ -102,7 +103,7 @@ export const Settings = () => {
         }
 
         if (passwordData.newPassword.length < 6) {
-            (window as any).showNotification?.({
+            window.showNotification?.({
                 type: "error",
                 title: t.common.error,
                 message: t.settings.passwordTooShort,
@@ -111,7 +112,7 @@ export const Settings = () => {
         }
 
         if (!passwordData.currentPassword) {
-            (window as any).showNotification?.({
+            window.showNotification?.({
                 type: "error",
                 title: t.common.error,
                 message: "Please enter your current password",
@@ -133,21 +134,22 @@ export const Settings = () => {
                 confirmPassword: "",
             });
 
-            (window as any).showNotification?.({
+            window.showNotification?.({
                 type: "success",
                 title: t.settings.passwordUpdated,
                 message: t.settings.passwordUpdated,
             });
-        } catch (error: any) {
+        } catch (error) {
             let errorMessage = t.common.error;
 
-            if (error.response?.status === 401) {
-                errorMessage = "Current password is incorrect";
-            } else if (error.response?.data?.message) {
-                errorMessage = error.response.data.message;
+            if (error instanceof ApiError) {
+                errorMessage =
+                    error.status === 401
+                        ? "Current password is incorrect"
+                        : error.message;
             }
 
-            (window as any).showNotification?.({
+            window.showNotification?.({
                 type: "error",
                 title: t.common.error,
                 message: errorMessage,
@@ -168,13 +170,13 @@ export const Settings = () => {
             );
             await new Promise((resolve) => setTimeout(resolve, 500));
 
-            (window as any).showNotification?.({
+            window.showNotification?.({
                 type: "success",
                 title: t.settings.preferencesSaved,
                 message: t.settings.preferencesSaved,
             });
-        } catch (error) {
-            (window as any).showNotification?.({
+        } catch {
+            window.showNotification?.({
                 type: "error",
                 title: t.common.error,
                 message: t.common.error,
@@ -186,7 +188,7 @@ export const Settings = () => {
 
     const handleThemeChange = (newTheme: "light" | "dark") => {
         setTheme(newTheme);
-        (window as any).showNotification?.({
+        window.showNotification?.({
             type: "success",
             title: t.common.success,
             message: `Theme changed to ${newTheme}`,
@@ -195,7 +197,7 @@ export const Settings = () => {
 
     const handleLanguageChange = (newLanguage: "en" | "ru" | "tk") => {
         setLanguage(newLanguage);
-        (window as any).showNotification?.({
+        window.showNotification?.({
             type: "success",
             title: t.common.success,
             message: `Language changed`,

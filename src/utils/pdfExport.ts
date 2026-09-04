@@ -3,6 +3,12 @@ import autoTable from 'jspdf-autotable';
 import { Case, EvidenceItem, TimelineEvent } from '@/types';
 import { formatDate } from './format';
 
+/**
+ * `jspdf-autotable` attaches this to the document after rendering a table but
+ * does not declare it on jsPDF's own type.
+ */
+type AutoTableDoc = jsPDF & { lastAutoTable: { finalY: number } };
+
 export const exportCaseToPDF = (
   caseData: Case,
   evidence: EvidenceItem[],
@@ -64,7 +70,7 @@ export const exportCaseToPDF = (
     },
   });
 
-  yPosition = (doc as any).lastAutoTable.finalY + 15;
+  yPosition = (doc as AutoTableDoc).lastAutoTable.finalY + 15;
 
   // Description
   doc.setFontSize(14);
@@ -132,7 +138,7 @@ export const exportCaseToPDF = (
       headStyles: { fillColor: primaryColor },
     });
 
-    yPosition = (doc as any).lastAutoTable.finalY + 15;
+    yPosition = (doc as AutoTableDoc).lastAutoTable.finalY + 15;
   } else {
     doc.setFontSize(10);
     doc.setTextColor(150);
@@ -175,7 +181,7 @@ export const exportCaseToPDF = (
       },
     });
 
-    yPosition = (doc as any).lastAutoTable.finalY + 10;
+    yPosition = (doc as AutoTableDoc).lastAutoTable.finalY + 10;
   } else {
     doc.setFontSize(10);
     doc.setTextColor(150);
@@ -207,7 +213,7 @@ export const exportCaseToPDF = (
   doc.save(fileName);
 
   // Показываем уведомление
-  (window as any).showNotification?.({
+  window.showNotification?.({
     type: 'success',
     title: 'Report Exported',
     message: `PDF report has been downloaded: ${fileName}`,

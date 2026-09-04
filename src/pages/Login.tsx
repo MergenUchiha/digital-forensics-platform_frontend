@@ -8,6 +8,7 @@ import { Mail, Lock, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/utils/cn";
 import logo from "@/assets/logo.png";
+import { ApiError } from '@/services/api';
 
 export const Login = () => {
     const [email, setEmail] = useState("");
@@ -52,27 +53,27 @@ export const Login = () => {
         try {
             await login(email, password);
             navigate("/");
-        } catch (error: any) {
-            let errorMessage = "Failed to login. Please try again.";
+        } catch (error) {
+            // Branching on `error.response.status` never worked: the API layer
+            // rejects with an ApiError, which carries `.status` directly.
+            let errorMessage = "Could not sign in. Please try again.";
 
-            if (error.response?.status === 401) {
-                errorMessage =
-                    "Invalid email or password. Please check your credentials and try again.";
-            } else if (error.response?.status === 404) {
-                errorMessage =
-                    "Account not found. Please check your email or register a new account.";
-            } else if (error.response?.status === 500) {
-                errorMessage = "Server error. Please try again later.";
-            } else if (error.code === "ERR_NETWORK") {
-                errorMessage =
-                    "Network error. Please check your internet connection.";
-            } else if (error.response?.data?.message) {
-                errorMessage = error.response.data.message;
+            if (error instanceof ApiError) {
+                if (error.status === 0) {
+                    errorMessage =
+                        "Network error. Check your connection and try again.";
+                } else if (error.status === 401) {
+                    errorMessage = "Invalid email or password.";
+                } else if (error.status >= 500) {
+                    errorMessage = "Server error. Please try again later.";
+                } else {
+                    errorMessage = error.message;
+                }
             }
 
             setErrors({ general: errorMessage });
 
-            (window as any).showNotification?.({
+            window.showNotification?.({
                 type: "error",
                 title: t.auth.loginFailed,
                 message: errorMessage,

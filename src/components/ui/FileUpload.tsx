@@ -64,7 +64,7 @@ export const FileUpload = ({
       });
 
       if (errors.length > 0) {
-        (window as any).showNotification?.({
+        window.showNotification?.({
           type: "error",
           title: t.common.error,
           message: errors.join(", "),
@@ -75,7 +75,7 @@ export const FileUpload = ({
         const updatedFiles = [...files, ...newFiles].slice(0, maxFiles);
         setFiles(updatedFiles);
         onFilesSelected(updatedFiles);
-        (window as any).showNotification?.({
+        window.showNotification?.({
           type: "success",
           title: t.common.success,
           message: `${newFiles.length} ${t.evidence.evidenceUploaded}`,
