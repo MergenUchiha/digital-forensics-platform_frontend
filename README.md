@@ -1,274 +1,116 @@
-# 🔍 ForensicsLab - Digital Evidence Platform
+# Digital Forensics Platform — Frontend
 
-A modern, full-stack digital forensics platform for managing investigation cases, evidence, and timeline analysis.
+Dashboard for the
+[`digital-forensics-platform_backend`](https://github.com/MergenUchiha/digital-forensics-platform_backend)
+API: cases, evidence with chain of custody, an investigation timeline,
+analytics, and PDF case reports.
 
-## 🏗️ Architecture
+## Stack
 
-- **Frontend**: React 18 + TypeScript + Vite + TailwindCSS
-- **Backend**: NestJS + Prisma + PostgreSQL
-- **Authentication**: JWT-based auth
-- **State Management**: React Context API
-- **UI Components**: Custom component library with Lucide icons
+| | |
+|---|---|
+| Framework | React 18 + TypeScript, Vite 5 |
+| Routing | react-router-dom 7 |
+| Styling | Tailwind CSS 3, light and dark themes |
+| Charts | Recharts, react-simple-maps |
+| Motion | framer-motion |
+| HTTP | axios with a shared interceptor |
+| PDF | jsPDF + jspdf-autotable |
+| i18n | English, Russian, Turkmen |
 
-## 🚀 Quick Start
+## Getting started
 
-### Prerequisites
-
-- Node.js 18+ and npm/yarn
-- PostgreSQL 14+
-- Git
-
-### Backend Setup
+The backend must be running first — see its README.
 
 ```bash
-cd backend
-
-# Install dependencies
-npm install
-
-# Setup environment variables
+bun install            # or npm install
 cp .env.example .env
-# Edit .env with your database credentials
-
-# Generate Prisma client
-npm run prisma:generate
-
-# Run migrations
-npm run prisma:migrate
-
-# Seed database with sample data
-npm run prisma:seed
-
-# Start development server
-npm run start:dev
+npm run dev            # http://localhost:3000
 ```
 
-Backend will run on `http://localhost:4000`
+| Variable | Default | Purpose |
+|---|---|---|
+| `VITE_API_URL` | `http://localhost:5001/api` | REST API, including the `/api` prefix |
 
-### Frontend Setup
+The dev server binds 3000 and the preview server 5173, both with
+`strictPort`; those are the two origins the backend allows through
+`CORS_ORIGINS` by default.
+
+## Pages
+
+| Route | What it shows |
+|---|---|
+| `/` | Case, evidence and event counts, an event chart by severity, recent timeline activity, and a world map of case locations |
+| `/cases` | Case list with a status filter, and case creation |
+| `/cases/:id` | One case: details, evidence, timeline, chain of custody, analysis |
+| `/evidence` | Evidence across visible cases, filtered by case, type and IoT device, with upload |
+| `/timeline` | Events filtered by case and severity |
+| `/reports` | Generate a PDF report for a case |
+| `/settings` | Profile, password, notification preferences, language, theme |
+
+## Authentication
+
+Sign in with an account an administrator created; registration is closed on
+the server. The token goes into `localStorage` and is attached as a bearer
+header by the axios interceptor. A 401 clears it and returns to the login
+screen.
+
+What a role can do is enforced by the API. An analyst sees the cases they
+opened and the ones assigned to them; an administrator sees everything and is
+the only one who can delete a case, a piece of evidence or a timeline event.
+The UI shows the same pages to both and surfaces the error when an action is
+refused.
+
+## Layout
+
+```
+src/
+├── services/          one file per API area, all through the axios instance
+│   └── api.ts         interceptors, ApiError, handleApiError
+├── contexts/          auth, language and theme providers
+├── locales/           en, ru, tk
+├── components/
+│   ├── layout/        Sidebar, Header (search, notifications, new case)
+│   ├── dashboard/     StatCard, ThreatChart, ActivityFeed, WorldMap
+│   ├── cases/         CaseCard, CreateCaseModal
+│   ├── evidence/      EvidenceCard
+│   ├── timeline/      Timeline
+│   └── ui/            Button, Card, Badge, Modal, Input, FileUpload,
+│                      SearchBar, Notification, ConfirmDialog
+├── hooks/useApi.ts    useApi, useMutation, useQuery
+├── utils/             formatting, class merging, PDF export
+└── types/             domain types and request payloads
+```
+
+## Scripts
 
 ```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Setup environment variables
-cp .env.example .env
-# Edit .env if needed (default points to localhost:4000)
-
-# Start development server
-npm run dev
+npm run dev       # dev server on 3000
+npm run build     # tsc && vite build
+npm run preview   # serve the production build on 5173
+npm run lint      # ESLint
 ```
 
-Frontend will run on `http://localhost:3000`
+## Known limitations
 
-## 📝 Environment Variables
+* **No tests.** Correctness was checked by building, linting and running the
+  app against a live API.
+* **Search is client-side.** The header search fetches the caller's cases and
+  evidence and filters them in the browser; the API has no search endpoint,
+  so it does not scale past a few hundred records.
+* **The world map loads its topology from a CDN** (`world-atlas` on jsDelivr),
+  so the map needs network access beyond the API.
+* **Reports are remembered in `localStorage`.** The PDF is generated in the
+  browser and nothing is stored server-side, so the report list is per-browser
+  and disappears when site data is cleared.
+* **Most of the Settings page is browser-local.** Only the display name and
+  the password reach the server.
+* **The token lives in `localStorage`,** so any script running on the page can
+  read it. Moving it to an httpOnly cookie needs the backend to set one.
+* **Network analysis is not implemented.** The page existed as a fully
+  commented-out file rendering fictional nodes; it was removed rather than
+  left as a dead route.
 
-### Backend (.env)
+## Licence
 
-```env
-DATABASE_URL="postgresql://user:password@localhost:5432/forensics_db"
-JWT_SECRET="REDACTED-ROTATE-JWT-SECRET"
-JWT_EXPIRES_IN="7d"
-PORT=4000
-FRONTEND_URL="http://localhost:3000"
-```
-
-### Frontend (.env)
-
-```env
-VITE_API_URL=http://localhost:4000/api
-```
-
-## 🔑 Default Credentials
-
-After seeding the database:
-
-- **Analyst Account**:
-  - Email: `analyst@forensics.io`
-  - Password: `REDACTED-ROTATE-SEED-PASSWORD`
-
-- **Admin Account**:
-  - Email: `admin@forensics.io`
-  - Password: `REDACTED-ROTATE-SEED-PASSWORD`
-
-## 📚 API Documentation
-
-Once the backend is running, visit:
-- Swagger UI: `http://localhost:4000/api/docs`
-- Health Check: `http://localhost:4000/api/health`
-
-## 🛠️ Development Scripts
-
-### Backend
-
-```bash
-npm run start:dev      # Start development server with hot reload
-npm run build          # Build for production
-npm run start:prod     # Start production server
-npm run lint           # Run ESLint
-npm run test           # Run tests
-npm run prisma:studio  # Open Prisma Studio (database GUI)
-```
-
-### Frontend
-
-```bash
-npm run dev            # Start development server
-npm run build          # Build for production
-npm run preview        # Preview production build
-npm run lint           # Run ESLint
-```
-
-## 📦 Key Features
-
-### ✅ Implemented
-
-- 🔐 JWT Authentication & Authorization
-- 📁 Case Management (CRUD operations)
-- 🗂️ Evidence Collection & Chain of Custody
-- ⏱️ Timeline Event Tracking
-- 📊 Analytics Dashboard
-- 🌍 Global Incident Map
-- 🔔 Real-time Notifications
-- 🌓 Dark/Light Theme
-- 🌐 Multi-language Support (EN, RU, TK)
-- 📄 PDF Report Generation
-- 🔍 Advanced Search & Filtering
-
-### 🎯 Tech Highlights
-
-- **Type Safety**: Full TypeScript coverage
-- **Validation**: Zod schemas for runtime validation
-- **Error Handling**: Comprehensive error boundaries and global exception filters
-- **Security**: CORS, helmet, rate limiting ready
-- **Database**: Prisma ORM with PostgreSQL
-- **UI/UX**: Responsive design with Tailwind CSS
-- **Performance**: Code splitting and lazy loading
-
-## 🏗️ Project Structure
-
-```
-forensics-platform/
-├── backend/
-│   ├── src/
-│   │   ├── modules/          # Feature modules
-│   │   │   ├── auth/
-│   │   │   ├── cases/
-│   │   │   ├── evidence/
-│   │   │   ├── timeline/
-│   │   │   ├── analytics/
-│   │   │   └── users/
-│   │   ├── common/           # Shared resources
-│   │   │   ├── filters/      # Exception filters
-│   │   │   ├── guards/       # Auth guards
-│   │   │   └── pipes/        # Validation pipes
-│   │   ├── prisma/           # Database service
-│   │   └── main.ts
-│   ├── prisma/
-│   │   ├── schema.prisma
-│   │   ├── seed.ts
-│   │   └── migrations/
-│   └── package.json
-│
-└── frontend/
-    ├── src/
-    │   ├── components/       # React components
-    │   │   ├── auth/
-    │   │   ├── cases/
-    │   │   ├── evidence/
-    │   │   ├── layout/
-    │   │   ├── ui/           # Reusable UI components
-    │   │   └── common/       # Common components
-    │   ├── contexts/         # React contexts
-    │   ├── hooks/            # Custom hooks
-    │   ├── pages/            # Page components
-    │   ├── services/         # API services
-    │   ├── types/            # TypeScript types
-    │   ├── utils/            # Utility functions
-    │   ├── locales/          # i18n translations
-    │   └── App.tsx
-    └── package.json
-```
-
-## 🔒 Security
-
-- JWT authentication with secure token storage
-- Password hashing with bcrypt
-- CORS configuration
-- SQL injection protection via Prisma
-- XSS protection
-- Input validation on both client and server
-- Error message sanitization
-
-## 🧪 Testing
-
-```bash
-# Backend
-cd backend
-npm test                    # Run unit tests
-npm run test:e2e           # Run e2e tests
-npm run test:cov           # Generate coverage report
-
-# Frontend
-cd frontend
-npm test                   # Run tests with Vitest
-```
-
-## 📈 Performance
-
-- Lazy loading of routes
-- Code splitting
-- Image optimization
-- Database query optimization with Prisma
-- Caching strategies
-- Pagination for large datasets
-
-## 🐛 Troubleshooting
-
-### Database Connection Issues
-
-```bash
-# Check if PostgreSQL is running
-sudo systemctl status postgresql
-
-# Test connection
-psql -U username -d forensics_db
-
-# Reset database
-npm run prisma:migrate:reset
-```
-
-### Port Already in Use
-
-```bash
-# Find and kill process on port 4000 (backend)
-lsof -ti:4000 | xargs kill -9
-
-# Find and kill process on port 3000 (frontend)
-lsof -ti:3000 | xargs kill -9
-```
-
-## 📄 License
-
-MIT License - see LICENSE file for details
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📞 Support
-
-For issues and questions:
-- Create an issue on GitHub
-- Check existing documentation
-- Review API docs at `/api/docs`
-
----
-
-Built with ❤️ using modern web technologies
+MIT
