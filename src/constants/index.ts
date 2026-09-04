@@ -123,7 +123,6 @@ export const ROUTES = {
   CASE_DETAILS: '/cases/:id',
   EVIDENCE: '/evidence',
   TIMELINE: '/timeline',
-  NETWORK: '/network',
   REPORTS: '/reports',
   SETTINGS: '/settings',
 } as const;

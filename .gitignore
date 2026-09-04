@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Compiler output captured by hand
+tsc_output.txt
+*.tsbuildinfo
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

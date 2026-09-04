@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -7,9 +7,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Load env file based on `mode`
-  const env = loadEnv(mode, process.cwd(), '')
-
   return {
     plugins: [
       react({
@@ -27,20 +24,16 @@ export default defineConfig(({ mode }) => {
     },
 
     server: {
+      // 3000 is one of the origins the backend allows out of the box through
+      // CORS_ORIGINS. `strictPort` makes a conflict an error rather than a
+      // silent move to another port the backend would then refuse.
       port: 3000,
       host: true,
-      strictPort: false,
-      // Proxy API requests to backend
-      proxy: {
-        '/api': {
-          target: env.VITE_API_URL || 'http://localhost:4000',
-          changeOrigin: true,
-          secure: false,
-          // rewrite: (path) => path.replace(/^\/api/, '')
-        },
-      },
-      // Enable CORS for development
-      cors: true,
+      strictPort: true,
+      // No proxy: the app calls VITE_API_URL directly. The proxy that was
+      // here pointed `/api` at `env.VITE_API_URL`, which already ends in
+      // `/api`, so a request for `/api/cases` would have gone to
+      // `…/api/api/cases`.
     },
 
     build: {
@@ -115,9 +108,10 @@ export default defineConfig(({ mode }) => {
 
     // Preview server configuration
     preview: {
+      // Also in CORS_ORIGINS, so a production build can be checked locally.
       port: 5173,
       host: true,
-      strictPort: false,
+      strictPort: true,
     },
   }
 })
