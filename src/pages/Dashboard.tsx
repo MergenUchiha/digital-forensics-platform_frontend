@@ -3,32 +3,46 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { ThreatChart } from "@/components/dashboard/ThreatChart";
 import { analyticsService } from "@/services/analytics.service";
+import { timelineService } from "@/services/timeline.service";
+import type { DashboardStats, SeverityCount, TimelineEvent } from "@/types";
+import { handleApiError } from "@/services/api";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { FolderOpen, AlertTriangle, Database, Activity } from "lucide-react";
 
 export const Dashboard = () => {
   const { t } = useLanguage();
-  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
+    null,
+  );
+  const [severity, setSeverity] = useState<SeverityCount[]>([]);
+  const [recentEvents, setRecentEvents] = useState<TimelineEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        setIsLoading(true);
-        const stats = await analyticsService.getDashboard();
+        const [stats, severityCounts, events] = await Promise.all([
+          analyticsService.getDashboard(),
+          analyticsService.getSeverityDistribution(),
+          timelineService.getAll(),
+        ]);
         setDashboardStats(stats);
+        setSeverity(severityCounts);
+        setRecentEvents(events.slice(0, 8));
       } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
-        (window as any).showNotification?.({
+        window.showNotification?.({
           type: "error",
           title: t.common.error,
-          message: t.messages.operationFailed,
+          message: handleApiError(error) || t.messages.operationFailed,
         });
       } finally {
         setIsLoading(false);
       }
     };
-    fetchDashboardData();
+    void fetchDashboardData();
+    // `t` is only read inside the error branch; refetching on a language
+    // change would be wasteful.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (isLoading) {
@@ -50,27 +64,14 @@ export const Dashboard = () => {
     );
   }
 
-  // Translated activity titles
-  const translatedActivities = (
-    dashboardStats.recentActivity || [
-      {
-        id: "1",
-        type: "case_created",
-        title: t.dashboard.newCaseCreated,
-        timestamp: new Date().toISOString(),
-        user: { name: "System" },
-      },
-    ]
-  ).map((a: any) => ({
-    ...a,
-    title:
-      a.type === "case_created"
-        ? t.dashboard.newCaseCreated
-        : a.type === "evidence_uploaded"
-          ? t.dashboard.evidenceUploaded
-          : a.type === "analysis_completed"
-            ? t.dashboard.analysisCompleted
-            : a.title,
+  // Real timeline events. This used to fall back to one invented entry
+  // reading "New case created" whenever the API returned nothing.
+  const activities = recentEvents.map((event) => ({
+    id: event.id,
+    type: "case_created" as const,
+    title: event.title,
+    timestamp: event.timestamp,
+    user: { name: event.source },
   }));
 
   return (
@@ -87,40 +88,42 @@ export const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title={t.dashboard.totalEvents}
-          value={dashboardStats.totalEvents || 0}
+          value={dashboardStats.eventsAnalyzed}
           icon={Activity}
           color="blue"
         />
         <StatCard
           title={t.dashboard.criticalAlerts}
-          value={dashboardStats.criticalAlerts || 0}
+          value={dashboardStats.suspiciousEvents}
           icon={AlertTriangle}
           color="red"
         />
         <StatCard
           title={t.dashboard.activeIncidents}
-          value={dashboardStats.activeIncidents || 0}
+          value={dashboardStats.activeCases}
           icon={FolderOpen}
           color="green"
         />
         <StatCard
-          title={t.dashboard.threatsBlocked}
-          value={dashboardStats.threatsBlocked || 0}
+          title={t.dashboard.evidenceCollected}
+          value={dashboardStats.evidenceCollected}
           icon={Database}
           color="purple"
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Counted from the timeline. The four bars used to be literals —
+            "Data Breach 15, Malware 12, DDoS 8, Phishing 5" — regardless of
+            what was in the database. */}
         <ThreatChart
-          data={[
-            { name: "Data Breach", count: 15, trend: "up" },
-            { name: "Malware", count: 12, trend: "stable" },
-            { name: "DDoS", count: 8, trend: "down" },
-            { name: "Phishing", count: 5, trend: "up" },
-          ]}
+          data={severity.map((item) => ({
+            name: item.severity,
+            count: item.count,
+            trend: "stable" as const,
+          }))}
         />
-        <ActivityFeed activities={translatedActivities} />
+        <ActivityFeed activities={activities} />
       </div>
     </div>
   );

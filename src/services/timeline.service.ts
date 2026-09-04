@@ -1,6 +1,9 @@
 // src/services/timeline.service.ts
 import { api } from './api';
-import { TimelineEvent } from '@/types';
+import type {
+  CreateTimelineEventPayload,
+  TimelineEvent,
+} from '@/types';
 
 export const timelineService = {
   async getAll(caseId?: string, severity?: string): Promise<TimelineEvent[]> {
@@ -15,7 +18,9 @@ export const timelineService = {
     return data;
   },
 
-  async create(eventData: any): Promise<TimelineEvent> {
+  async create(
+    eventData: CreateTimelineEventPayload,
+  ): Promise<TimelineEvent> {
     const { data } = await api.post<TimelineEvent>('/timeline', eventData);
     return data;
   },

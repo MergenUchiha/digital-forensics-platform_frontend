@@ -1,6 +1,10 @@
 // src/services/cases.service.ts
 import { api } from './api';
-import { Case } from '@/types';
+import type {
+  Case,
+  CreateCasePayload,
+  UpdateCasePayload,
+} from '@/types';
 
 export const casesService = {
   async getAll(status?: string): Promise<Case[]> {
@@ -15,12 +19,12 @@ export const casesService = {
     return data;
   },
 
-  async create(caseData: any): Promise<Case> {
+  async create(caseData: CreateCasePayload): Promise<Case> {
     const { data } = await api.post<Case>('/cases', caseData);
     return data;
   },
 
-  async update(id: string, caseData: any): Promise<Case> {
+  async update(id: string, caseData: UpdateCasePayload): Promise<Case> {
     const { data } = await api.put<Case>(`/cases/${id}`, caseData);
     return data;
   },

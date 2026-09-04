@@ -1,6 +1,6 @@
 // src/services/evidence.service.ts
 import { api } from './api';
-import { EvidenceItem } from '@/types';
+import type { CreateEvidencePayload, EvidenceItem } from '@/types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
@@ -17,7 +17,10 @@ export const evidenceService = {
     return data;
   },
 
-  async create(evidenceData: any, file?: File): Promise<EvidenceItem> {
+  async create(
+    evidenceData: CreateEvidencePayload,
+    file?: File,
+  ): Promise<EvidenceItem> {
     const formData = new FormData();
     formData.append('name', evidenceData.name);
     formData.append('type', evidenceData.type);

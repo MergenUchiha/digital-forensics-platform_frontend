@@ -128,13 +128,13 @@ export const WorldMap = ({ cases }: WorldMapProps) => {
                   <Marker
                     key={c.id}
                     coordinates={[lng, lat]}
-                    onMouseEnter={(e) => handleMarkerMouseEnter(c, e as any)}
+                    onMouseEnter={(e) => handleMarkerMouseEnter(c, e)}
                     onMouseLeave={handleMarkerMouseLeave}
                     style={{
                       default: { outline: 'none', cursor: 'pointer' },
                       hover: { outline: 'none', cursor: 'pointer' },
                       pressed: { outline: 'none', cursor: 'pointer' },
-                    } as any}
+                    }}
                   >
                     {/* Pulse ring */}
                     <circle
@@ -190,7 +190,7 @@ export const WorldMap = ({ cases }: WorldMapProps) => {
                 top: tooltipPos.y,
                 x: '-50%',
                 y: '-100%',
-              } as any}
+              }}
             >
               <div className="bg-bg-secondary border border-border-primary rounded-lg p-3 shadow-light-xl dark:shadow-dark-xl max-w-xs">
                 <div className="flex items-center gap-2 mb-1">
